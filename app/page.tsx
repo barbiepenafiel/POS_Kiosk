@@ -71,7 +71,7 @@ export default function OrderPage() {
     items.find((i) => i.product.id === productId)?.quantity ?? 0;
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-gradient-to-br from-app via-app to-app-accent">
+    <div className="flex h-screen flex-col overflow-hidden bg-gradient-to-br supports-[height:100dvh]:h-[100dvh] from-app via-app to-app-accent">
       {toast && (
         <Toast
           key={toast.id}
@@ -146,9 +146,10 @@ export default function OrderPage() {
           )}
         </div>
 
-        {/* Cart — full-height column on desktop, capped panel on mobile */}
-        <div className="flex max-h-[45vh] min-h-0 w-full flex-shrink-0 lg:max-h-none lg:w-80 xl:w-96">
-          <div className="min-h-0 w-full">
+        {/* Cart — full-height column on desktop, capped panel on tablets,
+            collapsed bar (expands to a bottom sheet) on phones */}
+        <div className="flex min-h-0 w-full flex-shrink-0 sm:max-h-[45vh] lg:max-h-none lg:w-80 xl:w-96">
+          <div className="min-h-0 w-full max-sm:h-16">
             <CartPanel
               items={items}
               totalAmount={totalAmount}
