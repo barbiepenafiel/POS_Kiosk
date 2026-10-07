@@ -88,11 +88,19 @@ CREATE POLICY "transaction_items_select" ON transaction_items
 
 INSERT INTO products (name, category, price, available) VALUES
   ('Coffee',        'Drinks', 45.00, TRUE),
-  ('Sandwich',      'Food',   50.00, TRUE),
   ('Soft Drink',    'Drinks', 35.00, TRUE),
-  ('Cookies',       'Snacks', 25.00, TRUE),
   ('Bottled Water', 'Drinks', 20.00, TRUE),
-  ('Chocolate',     'Snacks', 25.00, TRUE)
+  ('Frappe',        'Drinks', 65.00, TRUE),
+  ('Matcha Drink',  'Drinks', 70.00, TRUE),
+  ('Sandwich',      'Food',   50.00, TRUE),
+  ('Fried Chicken', 'Food',   75.00, TRUE),
+  ('Hotdog',        'Food',   40.00, TRUE),
+  ('Cookies',       'Snacks', 25.00, TRUE),
+  ('Chocolate',     'Snacks', 25.00, TRUE),
+  ('Candies',       'Snacks', 20.00, TRUE),
+  ('Gummy Bear',    'Snacks', 20.00, TRUE),
+  ('Ice Cream',     'Snacks', 30.00, TRUE),
+  ('Marshmallows',  'Snacks', 30.00, TRUE)
 ON CONFLICT DO NOTHING;
 
 -- ============================================================

@@ -85,11 +85,11 @@ export default function PaymentPage() {
             {/* Animated checkmark */}
             <div className="relative">
               <div
-                className={`absolute inset-0 rounded-full bg-green-200 transition-all duration-700 ${
+                className={`absolute inset-0 rounded-full bg-blue-200 transition-all duration-700 ${
                   successData.visible ? "scale-150 opacity-0" : "scale-100 opacity-60"
                 }`}
               />
-              <div className="w-28 h-28 rounded-full bg-green-500 flex items-center justify-center shadow-xl">
+              <div className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-800 to-slate-800 flex items-center justify-center shadow-xl">
                 <svg
                   className={`w-14 h-14 text-white transition-all duration-500 delay-150 ${
                     successData.visible ? "scale-100 opacity-100" : "scale-50 opacity-0"
@@ -105,11 +105,11 @@ export default function PaymentPage() {
             </div>
 
             <div className="text-center space-y-1">
-              <p className="text-3xl font-extrabold text-green-600">Order Successful!</p>
+              <p className="text-3xl font-extrabold text-blue-900">Order Successful!</p>
               <p className="text-gray-500 text-base">Payment has been confirmed</p>
             </div>
 
-            <div className="w-full bg-green-50 rounded-2xl px-5 py-4 space-y-2 text-sm">
+            <div className="w-full bg-blue-50 rounded-2xl px-5 py-4 space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-500">Amount Paid</span>
                 <span className="font-bold text-gray-800">{formatCurrency(successData.amountPaid)}</span>
@@ -117,7 +117,7 @@ export default function PaymentPage() {
               {method === "Cash" && successData.changeAmount > 0 && (
                 <div className="flex justify-between">
                   <span className="text-gray-500">Change</span>
-                  <span className="font-bold text-green-600">{formatCurrency(successData.changeAmount)}</span>
+                  <span className="font-bold text-blue-800">{formatCurrency(successData.changeAmount)}</span>
                 </div>
               )}
               <div className="flex justify-between">
@@ -131,7 +131,7 @@ export default function PaymentPage() {
             {/* Progress bar */}
             <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <div
-                className={`h-full bg-green-500 rounded-full transition-all ease-linear ${
+                className={`h-full bg-gradient-to-r from-blue-800 to-slate-700 rounded-full transition-all ease-linear ${
                   successData.visible ? "w-full" : "w-0"
                 }`}
                 style={{ transitionDuration: successData.visible ? "2700ms" : "0ms" }}
