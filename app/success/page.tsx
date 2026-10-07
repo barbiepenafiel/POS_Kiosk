@@ -2,14 +2,18 @@
 
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense } from "react";
 import { formatCurrency } from "@/lib/utils";
 import { fetchTransactionWithItems } from "@/lib/db";
 import { Transaction } from "@/types";
 import KioskHeader from "@/components/KioskHeader";
 
+/**
+ * NOTE: this screen is currently unreachable — the payment flow navigates
+ * straight from /payment to /receipt/[id]. It is kept as an optional
+ * confirmation step and restyled to match the rest of the kiosk.
+ */
 function SuccessContent() {
   const router = useRouter();
   const params = useSearchParams();
@@ -22,30 +26,54 @@ function SuccessContent() {
   const [txn, setTxn] = useState<Transaction | null>(null);
 
   useEffect(() => {
-    if (txnId) {
-      fetchTransactionWithItems(txnId)
-        .then((data) => setTxn(data.transaction))
-        .catch(() => {});
-    }
+    if (!txnId) return;
+    let active = true;
+    fetchTransactionWithItems(txnId)
+      .then((data) => {
+        if (active) setTxn(data.transaction);
+      })
+      .catch(() => {
+        /* non-fatal: the screen still shows the query-string values */
+      });
+    return () => {
+      active = false;
+    };
   }, [txnId]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-100 via-blue-50 to-blue-100">
+    <div className="flex h-screen flex-col overflow-hidden bg-gradient-to-br from-app via-app to-app-accent">
       <KioskHeader step={4} />
 
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8 flex flex-col items-center gap-6">
-        <div className="text-center">
-          <div className="text-7xl mb-4">✅</div>
-          <h2 className="text-4xl font-extrabold text-green-700">Payment Successful!</h2>
-          <p className="text-gray-500 mt-2">Your order has been processed.</p>
+      <main className="mx-auto flex min-h-0 w-full max-w-xl flex-1 flex-col items-center gap-4 overflow-y-auto px-4 py-5 sm:px-6">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-success shadow-card">
+            <svg
+              aria-hidden
+              className="h-10 w-10 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={3}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-success-ink sm:text-3xl">
+              Payment Successful!
+            </h2>
+            <p className="mt-1 text-sm font-medium text-ink-soft">
+              Your order has been processed.
+            </p>
+          </div>
         </div>
 
-        <div className="w-full bg-white rounded-2xl shadow-lg p-6 space-y-4">
+        <div className="w-full rounded-kiosk border border-line bg-surface p-5 shadow-card">
           {txn && (
             <DetailRow
               label="Transaction No."
               value={txn.transaction_number}
-              valueClass="font-mono font-bold text-gray-800"
+              mono
             />
           )}
           <DetailRow label="Payment Method" value={method} />
@@ -53,27 +81,23 @@ function SuccessContent() {
             label="Transaction Amount"
             value={txn ? formatCurrency(txn.total_amount) : "—"}
           />
-          <DetailRow
-            label="Amount Paid"
-            value={formatCurrency(amountPaid)}
-          />
+          <DetailRow label="Amount Paid" value={formatCurrency(amountPaid)} />
           {method === "Cash" && (
             <DetailRow
               label="Change"
               value={formatCurrency(changeAmount)}
-              valueClass="text-green-600 font-extrabold text-lg"
+              emphasis
             />
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 w-full">
-          <button
-            onClick={() => router.push(`/receipt/${txnId}`)}
-            className="flex-1 py-5 rounded-2xl text-xl font-extrabold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-lg"
-          >
-            View Receipt 🧾
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => router.push(txnId ? `/receipt/${txnId}` : "/")}
+          className="flex min-h-[3.25rem] w-full items-center justify-center rounded-kiosk bg-brand text-base font-extrabold text-ink-invert shadow-card transition-transform active:scale-[0.98]"
+        >
+          {txnId ? "View Receipt 🧾" : "Start New Transaction"}
+        </button>
       </main>
     </div>
   );
@@ -82,23 +106,37 @@ function SuccessContent() {
 function DetailRow({
   label,
   value,
-  valueClass = "font-bold text-gray-800",
+  mono,
+  emphasis,
 }: {
   label: string;
   value: string;
-  valueClass?: string;
+  mono?: boolean;
+  emphasis?: boolean;
 }) {
   return (
-    <div className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
-      <span className="text-gray-500">{label}</span>
-      <span className={valueClass}>{value}</span>
+    <div className="flex items-center justify-between gap-3 border-b border-line py-2.5 last:border-0">
+      <span className="text-sm font-medium text-ink-soft">{label}</span>
+      <span
+        className={`text-sm font-extrabold tabular-nums ${
+          mono ? "font-mono" : ""
+        } ${emphasis ? "text-success-ink" : "text-ink"}`}
+      >
+        {value}
+      </span>
     </div>
   );
 }
 
 export default function SuccessPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center bg-app">
+          <div className="h-11 w-11 animate-spin rounded-full border-4 border-line border-t-brand" />
+        </div>
+      }
+    >
       <SuccessContent />
     </Suspense>
   );

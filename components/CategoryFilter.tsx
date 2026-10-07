@@ -2,7 +2,12 @@
 
 type Category = "All" | "Drinks" | "Food" | "Snacks";
 
-const CATEGORIES: Category[] = ["All", "Drinks", "Food", "Snacks"];
+const CATEGORIES: { value: Category; icon: string }[] = [
+  { value: "All", icon: "🗂" },
+  { value: "Drinks", icon: "🥤" },
+  { value: "Food", icon: "🥪" },
+  { value: "Snacks", icon: "🍪" },
+];
 
 interface Props {
   selected: Category;
@@ -11,20 +16,31 @@ interface Props {
 
 export default function CategoryFilter({ selected, onChange }: Props) {
   return (
-    <div className="flex gap-2 flex-wrap">
-      {CATEGORIES.map((cat) => (
-        <button
-          key={cat}
-          onClick={() => onChange(cat)}
-          className={`px-5 py-2.5 rounded-2xl text-sm font-semibold transition-all min-h-[44px] ${
-            selected === cat
-              ? "bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md"
-              : "bg-white text-gray-600 border border-gray-200 hover:border-blue-700 hover:text-blue-800"
-          }`}
-        >
-          {cat}
-        </button>
-      ))}
+    <div
+      role="tablist"
+      aria-label="Product categories"
+      className="flex flex-wrap gap-2"
+    >
+      {CATEGORIES.map((cat) => {
+        const active = selected === cat.value;
+        return (
+          <button
+            key={cat.value}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(cat.value)}
+            className={`flex min-h-touch items-center gap-2 rounded-full border-2 px-4 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+              active
+                ? "border-brand bg-brand text-ink-invert shadow-card"
+                : "border-line bg-surface text-ink-soft active:bg-surface-sunken"
+            }`}
+          >
+            <span aria-hidden>{cat.icon}</span>
+            {cat.value}
+          </button>
+        );
+      })}
     </div>
   );
 }

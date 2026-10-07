@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface ToastProps {
   message: string;
@@ -8,6 +8,12 @@ interface ToastProps {
   onClose: () => void;
   duration?: number;
 }
+
+const STYLES = {
+  success: { bg: "bg-success", icon: "✓" },
+  error: { bg: "bg-danger", icon: "✕" },
+  info: { bg: "bg-brand", icon: "ℹ" },
+} as const;
 
 export default function Toast({
   message,
@@ -17,31 +23,41 @@ export default function Toast({
 }: ToastProps) {
   const [visible, setVisible] = useState(true);
 
+  // Keep the latest onClose without restarting the dismiss timer when a parent
+  // re-render hands us a new function identity.
+  const onCloseRef = useRef(onClose);
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setVisible(false);
-      setTimeout(onClose, 300);
-    }, duration);
-    return () => clearTimeout(timer);
-  }, [duration, onClose]);
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
-  const styles =
-    type === "success"
-      ? { bar: "bg-gradient-to-r from-blue-800 to-slate-800", icon: "✓", accent: "text-yellow-300" }
-      : type === "error"
-      ? { bar: "bg-gradient-to-r from-red-700 to-red-800", icon: "✕", accent: "text-red-200" }
-      : { bar: "bg-gradient-to-r from-blue-700 to-blue-900", icon: "ℹ", accent: "text-blue-200" };
+  useEffect(() => {
+    const hide = setTimeout(() => setVisible(false), duration);
+    const close = setTimeout(() => onCloseRef.current(), duration + 300);
+    return () => {
+      clearTimeout(hide);
+      clearTimeout(close);
+    };
+  }, [duration]);
+
+  const style = STYLES[type];
 
   return (
     <div
-      className={`fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 pl-4 pr-6 py-3 rounded-2xl text-white shadow-2xl border border-white/10 backdrop-blur transition-all duration-300 ${styles.bar} ${
-        visible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-3 scale-95"
+      role="status"
+      aria-live="polite"
+      className={`fixed left-1/2 top-4 z-[60] flex -translate-x-1/2 items-center gap-3 rounded-full py-2.5 pl-3 pr-5 text-white shadow-modal ring-1 ring-inset ring-white/15 transition-all duration-300 ${style.bg} ${
+        visible
+          ? "translate-y-0 opacity-100"
+          : "-translate-y-3 opacity-0"
       }`}
     >
-      <span className={`w-7 h-7 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm flex-shrink-0 ${styles.accent}`}>
-        {styles.icon}
+      <span
+        aria-hidden
+        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-white/25 text-sm font-bold"
+      >
+        {style.icon}
       </span>
-      <span className="text-sm font-semibold tracking-wide">{message}</span>
+      <span className="text-sm font-bold tracking-wide">{message}</span>
     </div>
   );
 }

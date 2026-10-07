@@ -13,205 +13,198 @@ import CashPayment from "@/components/payment/CashPayment";
 import QRPayment from "@/components/payment/QRPayment";
 import CardPayment from "@/components/payment/CardPayment";
 import Toast from "@/components/Toast";
+import PaymentSuccessOverlay, {
+  OverlayRow,
+} from "@/components/PaymentSuccessOverlay";
+
+const METHODS: {
+  id: PaymentMethod;
+  label: string;
+  short: string;
+  icon: string;
+  desc: string;
+}[] = [
+  { id: "Cash", label: "Cash", short: "Cash", icon: "💵", desc: "Bills and coins" },
+  { id: "QR", label: "QR Payment", short: "QR", icon: "📱", desc: "GCash, Maya, any QR app" },
+  { id: "Card", label: "Credit / Debit Card", short: "Card", icon: "💳", desc: "Tap, insert, or swipe" },
+];
+
+const REDIRECT_MS = 2800;
 
 export default function PaymentPage() {
   const router = useRouter();
   const { items, totalAmount, clearCart, hydrated } = useCart();
   const [method, setMethod] = useState<PaymentMethod | null>(null);
   const [processing, setProcessing] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "error" | "success" | "info" } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "error" | "success" | "info";
+  } | null>(null);
 
-  // Success notification state
-  const [successData, setSuccessData] = useState<{
-    txnId: string;
+  // Amount is captured before the cart is cleared so the overlay can show it.
+  const [success, setSuccess] = useState<{
     amountPaid: number;
     changeAmount: number;
+    total: number;
     visible: boolean;
   } | null>(null);
 
-  useEffect(() => {
-    if (hydrated && items.length === 0 && !successData) router.replace("/");
-  }, [hydrated, items.length, successData, router]);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(
+    () => () => timers.current.forEach(clearTimeout),
+    [],
+  );
 
-  if (!hydrated || (items.length === 0 && !successData)) return null;
+  useEffect(() => {
+    if (hydrated && items.length === 0 && !success) router.replace("/");
+  }, [hydrated, items.length, success, router]);
+
+  if (!hydrated || (items.length === 0 && !success)) return null;
 
   const handlePayment = async (amountPaid: number, changeAmount: number) => {
     if (processing || !method) return;
     setProcessing(true);
+    const total = totalAmount;
     try {
-      const txn = await saveTransaction(items, totalAmount, method, amountPaid, changeAmount);
+      const txn = await saveTransaction(
+        items,
+        total,
+        method,
+        amountPaid,
+        changeAmount,
+      );
       clearCart();
-      // Show success notification first
-      setSuccessData({ txnId: txn.id, amountPaid, changeAmount, visible: false });
-      setTimeout(() => setSuccessData((d) => d ? { ...d, visible: true } : d), 50);
-      // Navigate to receipt after notification
-      setTimeout(() => {
-        router.push(`/receipt/${txn.id}`);
-      }, 2800);
+      setSuccess({ amountPaid, changeAmount, total, visible: false });
+      timers.current.push(
+        setTimeout(
+          () => setSuccess((d) => (d ? { ...d, visible: true } : d)),
+          50,
+        ),
+        setTimeout(() => router.push(`/receipt/${txn.id}`), REDIRECT_MS),
+      );
     } catch {
       setToast({ message: "Payment failed. Please try again.", type: "error" });
       setProcessing(false);
     }
   };
 
-  const METHODS: { id: PaymentMethod; label: string; icon: string; desc: string }[] = [
-    { id: "Cash", label: "Cash", icon: "💵", desc: "Pay with bills and coins" },
-    { id: "QR", label: "QR Payment", icon: "📱", desc: "GCash, Maya, or any QR app" },
-    { id: "Card", label: "Credit / Debit Card", icon: "💳", desc: "Tap, insert, or swipe" },
-  ];
+  const active = METHODS.find((m) => m.id === method);
 
   return (
-    <div className="h-screen overflow-hidden flex flex-col bg-gradient-to-br from-slate-100 via-blue-50 to-blue-100">
+    <div className="flex h-screen flex-col overflow-hidden bg-gradient-to-br from-app via-app to-app-accent">
       {toast && (
-        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
 
-      {/* Payment Success Notification */}
-      {successData && (
-        <div
-          className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-500 ${
-            successData.visible ? "opacity-100" : "opacity-0"
-          }`}
+      {success && (
+        <PaymentSuccessOverlay
+          visible={success.visible}
+          title="Order Successful!"
+          subtitle="Payment has been confirmed"
+          progressMs={REDIRECT_MS - 100}
+          footnote="Opening your receipt…"
         >
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/40" />
-
-          {/* Card */}
-          <div
-            className={`relative bg-white rounded-3xl shadow-2xl px-12 py-10 flex flex-col items-center gap-5 mx-4 max-w-sm w-full transition-all duration-500 ${
-              successData.visible ? "scale-100 translate-y-0" : "scale-90 translate-y-8"
-            }`}
-          >
-            {/* Animated checkmark */}
-            <div className="relative">
-              <div
-                className={`absolute inset-0 rounded-full bg-blue-200 transition-all duration-700 ${
-                  successData.visible ? "scale-150 opacity-0" : "scale-100 opacity-60"
-                }`}
-              />
-              <div className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-800 to-slate-800 flex items-center justify-center shadow-xl">
-                <svg
-                  className={`w-14 h-14 text-white transition-all duration-500 delay-150 ${
-                    successData.visible ? "scale-100 opacity-100" : "scale-50 opacity-0"
-                  }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-            </div>
-
-            <div className="text-center space-y-1">
-              <p className="text-3xl font-extrabold text-blue-900">Order Successful!</p>
-              <p className="text-gray-500 text-base">Payment has been confirmed</p>
-            </div>
-
-            <div className="w-full bg-blue-50 rounded-2xl px-5 py-4 space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Amount Paid</span>
-                <span className="font-bold text-gray-800">{formatCurrency(successData.amountPaid)}</span>
-              </div>
-              {method === "Cash" && successData.changeAmount > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Change</span>
-                  <span className="font-bold text-blue-800">{formatCurrency(successData.changeAmount)}</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-gray-500">Payment</span>
-                <span className="font-bold text-gray-800">{method}</span>
-              </div>
-            </div>
-
-            <p className="text-xs text-gray-400">Opening your receipt...</p>
-
-            {/* Progress bar */}
-            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className={`h-full bg-gradient-to-r from-blue-800 to-slate-700 rounded-full transition-all ease-linear ${
-                  successData.visible ? "w-full" : "w-0"
-                }`}
-                style={{ transitionDuration: successData.visible ? "2700ms" : "0ms" }}
-              />
-            </div>
-          </div>
-        </div>
+          <OverlayRow label="Payment" value={method ?? "—"} />
+          <OverlayRow
+            label="Amount Paid"
+            value={formatCurrency(success.amountPaid)}
+          />
+          {method === "Cash" && success.changeAmount > 0 && (
+            <OverlayRow
+              label="Change"
+              value={formatCurrency(success.changeAmount)}
+              emphasis
+            />
+          )}
+        </PaymentSuccessOverlay>
       )}
 
       <KioskHeader step={3} />
 
-      <main className="flex-1 overflow-y-auto max-w-3xl mx-auto w-full px-4 py-3 flex flex-col gap-3">
-        <div className="text-center">
-          <h2 className="text-2xl font-extrabold text-gray-800">How would you like to pay?</h2>
-          <p className="text-base text-blue-700 font-bold mt-1">
+      <main className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col gap-3 px-4 py-4 sm:px-6">
+        <div className="flex-shrink-0 text-center">
+          <h2 className="text-xl font-black text-ink sm:text-2xl">
+            {method ? "Complete Your Payment" : "How would you like to pay?"}
+          </h2>
+          <p className="mt-0.5 text-sm font-bold text-brand-ink">
             Amount Due: {formatCurrency(totalAmount)}
           </p>
         </div>
 
-        {/* Method selector */}
         {!method && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid flex-shrink-0 grid-cols-1 gap-3 sm:grid-cols-3">
             {METHODS.map((m) => (
               <button
                 key={m.id}
+                type="button"
                 onClick={() => setMethod(m.id)}
-                className="bg-white rounded-2xl shadow-md hover:shadow-xl active:scale-95 transition-all p-4 flex flex-col items-center gap-2 border-2 border-transparent hover:border-blue-400"
+                className="flex min-h-touch flex-row items-center gap-3 rounded-kiosk border-2 border-line bg-surface p-4 text-left shadow-card transition-transform active:scale-[0.97] sm:flex-col sm:text-center"
               >
-                <span className="text-4xl">{m.icon}</span>
-                <span className="font-bold text-gray-800">{m.label}</span>
-                <span className="text-xs text-gray-500 text-center">{m.desc}</span>
+                <span aria-hidden className="text-3xl sm:text-4xl">
+                  {m.icon}
+                </span>
+                <span className="flex flex-col gap-0.5">
+                  <span className="text-sm font-bold text-ink">{m.label}</span>
+                  <span className="text-xs font-medium text-ink-faint">
+                    {m.desc}
+                  </span>
+                </span>
               </button>
             ))}
           </div>
         )}
 
-        {/* Payment form */}
         {method && (
-          <div className="bg-white rounded-2xl shadow-lg p-4">
-            <div className="flex items-center justify-between mb-4">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-kiosk border border-line bg-surface shadow-card">
+            <div className="flex flex-shrink-0 items-center justify-between gap-3 border-b border-line bg-surface-sunken px-4 py-2.5">
               <div className="flex items-center gap-2">
-                <span className="text-xl">
-                  {METHODS.find((m) => m.id === method)?.icon}
+                <span aria-hidden className="text-lg">
+                  {active?.icon}
                 </span>
-                <h3 className="font-bold text-base text-gray-800">
-                  {METHODS.find((m) => m.id === method)?.label}
-                </h3>
+                <h3 className="text-sm font-bold text-ink">{active?.label}</h3>
               </div>
               <button
+                type="button"
                 onClick={() => setMethod(null)}
-                className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-xl hover:bg-gray-100 transition-colors"
+                disabled={processing}
+                className="flex min-h-touch items-center rounded-xl px-3 text-xs font-bold text-ink-soft transition-colors active:bg-surface disabled:opacity-40"
               >
                 Change method
               </button>
             </div>
 
-            {method === "Cash" && (
-              <CashPayment
-                totalAmount={totalAmount}
-                onConfirm={(paid) => handlePayment(paid, paid - totalAmount)}
-              />
-            )}
-            {method === "QR" && (
-              <QRPayment
-                totalAmount={totalAmount}
-                onConfirm={() => handlePayment(totalAmount, 0)}
-              />
-            )}
-            {method === "Card" && (
-              <CardPayment
-                totalAmount={totalAmount}
-                onConfirm={() => handlePayment(totalAmount, 0)}
-              />
-            )}
+            <div className="min-h-0 flex-1 overflow-y-auto p-4">
+              {method === "Cash" && (
+                <CashPayment
+                  totalAmount={totalAmount}
+                  onConfirm={(paid) => handlePayment(paid, paid - totalAmount)}
+                />
+              )}
+              {method === "QR" && (
+                <QRPayment
+                  totalAmount={totalAmount}
+                  onConfirm={() => handlePayment(totalAmount, 0)}
+                />
+              )}
+              {method === "Card" && (
+                <CardPayment
+                  totalAmount={totalAmount}
+                  onConfirm={() => handlePayment(totalAmount, 0)}
+                />
+              )}
+            </div>
           </div>
         )}
 
         <button
-          onClick={() => router.back()}
-          className="flex-shrink-0 w-full py-3 rounded-2xl text-base font-semibold text-gray-600 bg-white border-2 border-gray-200 hover:bg-gray-50 transition-colors"
+          type="button"
+          onClick={() => router.push("/review")}
+          disabled={processing}
+          className="flex min-h-[3.25rem] w-full flex-shrink-0 items-center justify-center rounded-kiosk border-2 border-line bg-surface text-base font-bold text-ink transition-colors active:bg-surface-sunken disabled:opacity-40"
         >
           ← Back to Review
         </button>

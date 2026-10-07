@@ -27,7 +27,7 @@ export default function RestockCountdown() {
   ];
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white rounded-2xl shadow-2xl border border-white/10 px-4 py-3">
+    <div className="fixed bottom-4 left-4 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white rounded-2xl shadow-2xl border border-white/10 px-4 py-3">
       <div className="flex items-center justify-between gap-4 mb-2">
         <p className="text-sm font-bold tracking-wide">📦 Next Restock</p>
         <button
