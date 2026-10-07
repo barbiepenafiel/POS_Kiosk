@@ -102,3 +102,41 @@ INSERT INTO products (name, category, price, available) VALUES
   ('Ice Cream',     'Snacks', 30.00, TRUE),
   ('Marshmallows',  'Snacks', 30.00, TRUE)
 ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- Seed: Additional Menu Items
+-- ============================================================
+
+INSERT INTO products (name, category, price, available) VALUES
+  ('Burger',        'Food',   50.00,  TRUE),
+  ('Pizza',         'Food',   100.00, TRUE),
+  ('Fried Chicken', 'Food',   30.00,  TRUE),
+  ('Hotdog',        'Food',   30.00,  TRUE),
+  ('Matcha',        'Drinks', 70.00,  TRUE),
+  ('Frappe',        'Drinks', 100.00, TRUE),
+  ('Juice',         'Drinks', 20.00,  TRUE),
+  ('Ice Cream',     'Snacks', 30.00,  TRUE),
+  ('Candies',       'Snacks', 20.00,  TRUE),
+  ('Gummy Bear',    'Snacks', 20.00,  TRUE),
+  ('Marshmallows',  'Snacks', 30.00,  TRUE)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- Stock Quantity (same as supabase/add-stock.sql)
+-- ============================================================
+
+-- Stock quantity per product (every existing product starts at 10)
+ALTER TABLE products
+  ADD COLUMN IF NOT EXISTS stock INTEGER NOT NULL DEFAULT 10 CHECK (stock >= 0);
+
+-- Deduct sold quantity from stock (never goes below zero)
+CREATE OR REPLACE FUNCTION decrement_stock(p_product_id UUID, p_quantity INTEGER)
+RETURNS VOID
+LANGUAGE sql
+AS $$
+  UPDATE products
+  SET stock = GREATEST(stock - p_quantity, 0)
+  WHERE id = p_product_id;
+$$;
+
+GRANT EXECUTE ON FUNCTION decrement_stock(UUID, INTEGER) TO anon;

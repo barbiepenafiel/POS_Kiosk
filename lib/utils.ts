@@ -17,6 +17,18 @@ export function generateQRReference(): string {
   return `QR-TXN-${ref}`;
 }
 
+// Weekly restock day: 0 = Sunday, 1 = Monday, … 6 = Saturday
+export const RESTOCK_WEEKDAY = 1;
+
+// Next restock is the coming RESTOCK_WEEKDAY at midnight — always within 1 week
+export function getNextRestockDate(from: Date = new Date()): Date {
+  const next = new Date(from);
+  next.setHours(0, 0, 0, 0);
+  const daysAhead = (RESTOCK_WEEKDAY - next.getDay() + 7) % 7 || 7;
+  next.setDate(next.getDate() + daysAhead);
+  return next;
+}
+
 export function formatDateTime(dateStr: string): string {
   return new Date(dateStr).toLocaleString("en-PH", {
     year: "numeric",

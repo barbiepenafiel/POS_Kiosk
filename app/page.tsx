@@ -12,6 +12,7 @@ import CartPanel from "@/components/CartPanel";
 import CategoryFilter from "@/components/CategoryFilter";
 import KioskHeader from "@/components/KioskHeader";
 import Toast from "@/components/Toast";
+import RestockCountdown from "@/components/RestockCountdown";
 
 type Category = "All" | "Drinks" | "Food" | "Snacks";
 
@@ -41,6 +42,10 @@ export default function OrderPage() {
   }, []);
 
   const handleAdd = (product: Product) => {
+    if (product.stock != null && getCartQty(product.id) >= product.stock) {
+      showToast(`Only ${product.stock} ${product.name} in stock`, "info");
+      return;
+    }
     addItem(product);
   };
 
@@ -116,6 +121,8 @@ export default function OrderPage() {
           />
         </div>
       </main>
+
+      <RestockCountdown />
     </div>
   );
 }
