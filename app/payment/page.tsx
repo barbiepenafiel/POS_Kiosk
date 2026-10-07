@@ -33,7 +33,7 @@ const REDIRECT_MS = 2800;
 
 export default function PaymentPage() {
   const router = useRouter();
-  const { items, totalAmount, clearCart } = useCart();
+  const { items, totalAmount, clearCart, hydrated } = useCart();
   const [method, setMethod] = useState<PaymentMethod | null>(null);
   const [processing, setProcessing] = useState(false);
   const [toast, setToast] = useState<{
@@ -56,10 +56,10 @@ export default function PaymentPage() {
   );
 
   useEffect(() => {
-    if (items.length === 0 && !success) router.replace("/");
-  }, [items.length, success, router]);
+    if (hydrated && items.length === 0 && !success) router.replace("/");
+  }, [hydrated, items.length, success, router]);
 
-  if (items.length === 0 && !success) return null;
+  if (!hydrated || (items.length === 0 && !success)) return null;
 
   const handlePayment = async (amountPaid: number, changeAmount: number) => {
     if (processing || !method) return;

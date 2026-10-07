@@ -12,6 +12,7 @@ import CartPanel from "@/components/CartPanel";
 import CategoryFilter from "@/components/CategoryFilter";
 import KioskHeader from "@/components/KioskHeader";
 import Toast from "@/components/Toast";
+import RestockCountdown from "@/components/RestockCountdown";
 
 type Category = "All" | "Drinks" | "Food" | "Snacks";
 
@@ -22,7 +23,10 @@ export default function OrderPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<Category>("All");
-  const [toast, setToast] = useState<{ message: string } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type?: "success" | "info";
+  } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -42,6 +46,13 @@ export default function OrderPage() {
   }, []);
 
   const handleAdd = (product: Product) => {
+    if (product.stock != null && getCartQty(product.id) >= product.stock) {
+      setToast({
+        message: `Only ${product.stock} ${product.name} in stock`,
+        type: "info",
+      });
+      return;
+    }
     addItem(product);
     setToast({ message: `${product.name} added to order` });
   };
@@ -59,7 +70,7 @@ export default function OrderPage() {
       {toast && (
         <Toast
           message={toast.message}
-          type="success"
+          type={toast.type ?? "success"}
           duration={1600}
           onClose={() => setToast(null)}
         />
@@ -133,6 +144,8 @@ export default function OrderPage() {
           </div>
         </div>
       </main>
+
+      <RestockCountdown />
     </div>
   );
 }
