@@ -9,6 +9,7 @@ interface Props {
   totalAmount: number;
   onProceed: () => void;
   showControls?: boolean;
+  onNotify?: (message: string) => void;
 }
 
 export default function CartPanel({
@@ -16,6 +17,7 @@ export default function CartPanel({
   totalAmount,
   onProceed,
   showControls = true,
+  onNotify,
 }: Props) {
   const { increaseQty, decreaseQty, removeItem } = useCart();
   const count = items.reduce((s, i) => s + i.quantity, 0);
@@ -47,61 +49,79 @@ export default function CartPanel({
             <p className="text-sm font-medium">Tap a product to add it</p>
           </div>
         ) : (
-          items.map((item) => (
-            <article
-              key={item.product.id}
-              className="rounded-xl border border-line bg-surface-sunken p-3"
-            >
-              <div className="mb-2 flex items-start justify-between gap-2">
-                <p className="flex-1 text-sm font-bold leading-tight text-ink">
-                  {item.product.name}
-                </p>
-                <p className="whitespace-nowrap text-sm font-extrabold text-brand-ink">
-                  {formatCurrency(item.product.price * item.quantity)}
-                </p>
-              </div>
+          items.map((item) => {
+            const atLimit =
+              item.product.stock != null && item.quantity >= item.product.stock;
+            const removed = `${item.product.name} removed from order`;
+            return (
+              <article
+                key={item.product.id}
+                className="rounded-xl border border-line bg-surface-sunken p-3"
+              >
+                <div className="mb-2 flex items-start justify-between gap-2">
+                  <p className="flex-1 text-sm font-bold leading-tight text-ink">
+                    {item.product.name}
+                  </p>
+                  <p className="whitespace-nowrap text-sm font-extrabold text-brand-ink">
+                    {formatCurrency(item.product.price * item.quantity)}
+                  </p>
+                </div>
 
-              {showControls ? (
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1">
+                {showControls ? (
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        aria-label={`Decrease ${item.product.name}`}
+                        onClick={() => {
+                          decreaseQty(item.product.id);
+                          if (item.quantity <= 1) onNotify?.(removed);
+                        }}
+                        className="flex h-11 w-11 items-center justify-center rounded-xl border border-line bg-surface text-xl font-bold text-ink transition-colors active:bg-surface-sunken"
+                      >
+                        −
+                      </button>
+                      <span
+                        aria-live="polite"
+                        className="w-9 text-center text-base font-extrabold text-ink"
+                      >
+                        {item.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        aria-label={`Increase ${item.product.name}`}
+                        onClick={() => increaseQty(item.product.id)}
+                        disabled={atLimit}
+                        className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand text-xl font-bold text-ink-invert transition-opacity active:opacity-80 disabled:cursor-not-allowed disabled:bg-surface disabled:text-ink-faint disabled:ring-1 disabled:ring-line"
+                      >
+                        +
+                      </button>
+                    </div>
                     <button
                       type="button"
-                      aria-label={`Decrease ${item.product.name}`}
-                      onClick={() => decreaseQty(item.product.id)}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl border border-line bg-surface text-xl font-bold text-ink transition-colors active:bg-surface-sunken"
+                      onClick={() => {
+                        removeItem(item.product.id);
+                        onNotify?.(removed);
+                      }}
+                      className="flex min-h-touch items-center rounded-xl px-3 text-xs font-bold text-danger-ink transition-colors active:bg-danger-soft"
                     >
-                      −
-                    </button>
-                    <span
-                      aria-live="polite"
-                      className="w-9 text-center text-base font-extrabold text-ink"
-                    >
-                      {item.quantity}
-                    </span>
-                    <button
-                      type="button"
-                      aria-label={`Increase ${item.product.name}`}
-                      onClick={() => increaseQty(item.product.id)}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand text-xl font-bold text-ink-invert transition-opacity active:opacity-80"
-                    >
-                      +
+                      Remove
                     </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => removeItem(item.product.id)}
-                    className="flex min-h-touch items-center rounded-xl px-3 text-xs font-bold text-danger-ink transition-colors active:bg-danger-soft"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ) : (
-                <p className="text-xs font-medium text-ink-soft">
-                  {item.quantity} × {formatCurrency(item.product.price)}
-                </p>
-              )}
-            </article>
-          ))
+                ) : (
+                  <p className="text-xs font-medium text-ink-soft">
+                    {item.quantity} × {formatCurrency(item.product.price)}
+                  </p>
+                )}
+
+                {showControls && atLimit && (
+                  <p className="mt-2 text-xs font-bold text-warning-ink">
+                    All {item.product.stock} in stock are in your order.
+                  </p>
+                )}
+              </article>
+            );
+          })
         )}
       </div>
 

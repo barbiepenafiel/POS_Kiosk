@@ -23,13 +23,21 @@ export default function OrderPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<Category>("All");
+  // id changes on every message so each toast gets its full time on screen
   const [toast, setToast] = useState<{
+    id: number;
     message: string;
-    type?: "success" | "info";
+    type: "success" | "info";
   } | null>(null);
+  const [attempt, setAttempt] = useState(0);
+
+  const notify = (message: string, type: "success" | "info" = "success") =>
+    setToast((prev) => ({ id: (prev?.id ?? 0) + 1, message, type }));
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
+    setError(null);
     fetchProducts()
       .then((data) => {
         if (active) setProducts(data);
@@ -43,18 +51,15 @@ export default function OrderPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [attempt]);
 
   const handleAdd = (product: Product) => {
     if (product.stock != null && getCartQty(product.id) >= product.stock) {
-      setToast({
-        message: `Only ${product.stock} ${product.name} in stock`,
-        type: "info",
-      });
+      notify(`Only ${product.stock} ${product.name} in stock`, "info");
       return;
     }
     addItem(product);
-    setToast({ message: `${product.name} added to order` });
+    notify(`${product.name} added to order`);
   };
 
   const filtered =
@@ -69,8 +74,9 @@ export default function OrderPage() {
     <div className="flex h-screen flex-col overflow-hidden bg-gradient-to-br from-app via-app to-app-accent">
       {toast && (
         <Toast
+          key={toast.id}
           message={toast.message}
-          type={toast.type ?? "success"}
+          type={toast.type}
           duration={1600}
           onClose={() => setToast(null)}
         />
@@ -103,6 +109,13 @@ export default function OrderPage() {
               className="rounded-kiosk border border-danger/40 bg-danger-soft p-5 text-center"
             >
               <p className="font-bold text-danger-ink">{error}</p>
+              <button
+                type="button"
+                onClick={() => setAttempt((n) => n + 1)}
+                className="mx-auto mt-3 flex min-h-touch items-center rounded-kiosk bg-brand px-6 text-sm font-extrabold text-ink-invert shadow-card transition-transform active:scale-[0.98]"
+              >
+                Try Again
+              </button>
             </div>
           )}
 
@@ -140,6 +153,7 @@ export default function OrderPage() {
               items={items}
               totalAmount={totalAmount}
               onProceed={() => router.push("/review")}
+              onNotify={(message) => notify(message, "info")}
             />
           </div>
         </div>
