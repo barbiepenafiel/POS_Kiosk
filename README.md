@@ -144,7 +144,7 @@ supabase/
 
 ---
 
-## Author
+## Authors
 
 **Barbie Penafiel, 
 Christian Jericho Loquillano,  
