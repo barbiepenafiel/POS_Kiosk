@@ -15,7 +15,7 @@ export default function KioskHeader({ step }: Props) {
         {/* Brand */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center shadow-inner text-xl">
-            ⚡
+            🏪
           </div>
           <div>
             <h1 className="text-2xl font-black text-white tracking-tight leading-none">

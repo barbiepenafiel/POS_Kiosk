@@ -10,12 +10,35 @@ const CATEGORY_EMOJI: Record<string, string> = {
 };
 
 const PRODUCT_EMOJI: Record<string, string> = {
+  // Drinks
   Coffee: "☕",
-  Sandwich: "🥪",
   "Soft Drink": "🥤",
-  Cookies: "🍪",
   "Bottled Water": "💧",
+  Frappe: "🧋",
+  "Matcha Drink": "🍵",
+  Juice: "🧃",
+  Milk: "🥛",
+  Tea: "🍵",
+  // Food
+  Sandwich: "🥪",
+  "Fried Chicken": "🍗",
+  Hotdog: "🌭",
+  Rice: "🍚",
+  Burger: "🍔",
+  Pizza: "🍕",
+  Noodles: "🍜",
+  // Snacks
+  Cookies: "🍪",
   Chocolate: "🍫",
+  Candies: "🍬",
+  Candy: "🍬",
+  "Gummy Bear": "🐻",
+  Gummies: "🐻",
+  "Ice Cream": "🍦",
+  Marshmallows: "☁️",
+  Chips: "🍟",
+  Popcorn: "🍿",
+  Crackers: "🫙",
 };
 
 interface Props {

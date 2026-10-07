@@ -90,11 +90,11 @@ export default function ReceiptPage({ params }: { params: { id: string } }) {
             {/* Animated checkmark circle */}
             <div className="relative">
               <div
-                className={`absolute inset-0 rounded-full bg-green-200 transition-all duration-700 ${
+                className={`absolute inset-0 rounded-full bg-blue-200 transition-all duration-700 ${
                   bannerVisible ? "scale-150 opacity-0" : "scale-100 opacity-50"
                 }`}
               />
-              <div className="w-24 h-24 rounded-full bg-green-500 flex items-center justify-center shadow-lg">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-800 to-slate-800 flex items-center justify-center shadow-lg">
                 <svg
                   className={`w-12 h-12 text-white transition-all duration-500 delay-200 ${
                     bannerVisible ? "scale-100 opacity-100" : "scale-50 opacity-0"
@@ -110,7 +110,7 @@ export default function ReceiptPage({ params }: { params: { id: string } }) {
             </div>
 
             <div className="text-center">
-              <p className="text-2xl font-extrabold text-green-600">Payment Successful!</p>
+              <p className="text-2xl font-extrabold text-blue-900">Payment Successful!</p>
               <p className="text-gray-500 text-sm mt-1">Your receipt is ready below</p>
               {data && (
                 <p className="mt-3 font-mono text-xs text-gray-400 bg-gray-50 px-3 py-1 rounded-full inline-block">
@@ -122,7 +122,7 @@ export default function ReceiptPage({ params }: { params: { id: string } }) {
             {/* Auto-dismiss progress bar */}
             <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <div
-                className={`h-full bg-green-500 rounded-full transition-all ease-linear ${
+                className={`h-full bg-gradient-to-r from-blue-800 to-slate-700 rounded-full transition-all ease-linear ${
                   bannerVisible ? "w-full" : "w-0"
                 }`}
                 style={{ transitionDuration: bannerVisible ? "2900ms" : "0ms" }}
@@ -197,8 +197,8 @@ export default function ReceiptPage({ params }: { params: { id: string } }) {
               )}
             </div>
 
-            <div className="bg-green-50 rounded-xl p-2 text-center">
-              <span className="text-green-700 font-bold text-sm">✓ Payment Successful</span>
+            <div className="bg-blue-50 rounded-xl p-2 text-center">
+              <span className="text-blue-900 font-bold text-sm">✓ Payment Successful</span>
             </div>
 
             <p className="text-center text-xs text-gray-400">Thank you for your purchase! · CampusTapXP</p>
