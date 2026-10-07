@@ -16,6 +16,17 @@ const PRODUCT_EMOJI: Record<string, string> = {
   Cookies: "🍪",
   "Bottled Water": "💧",
   Chocolate: "🍫",
+  Burger: "🍔",
+  Pizza: "🍕",
+  "Fried Chicken": "🍗",
+  Hotdog: "🌭",
+  Matcha: "🍵",
+  Frappe: "🧋",
+  Juice: "🧃",
+  "Ice Cream": "🍦",
+  Candies: "🍬",
+  "Gummy Bear": "🧸",
+  Marshmallows: "🍡",
 };
 
 interface Props {

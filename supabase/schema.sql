@@ -94,3 +94,21 @@ INSERT INTO products (name, category, price, available) VALUES
   ('Bottled Water', 'Drinks', 20.00, TRUE),
   ('Chocolate',     'Snacks', 25.00, TRUE)
 ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- Seed: Additional Menu Items
+-- ============================================================
+
+INSERT INTO products (name, category, price, available) VALUES
+  ('Burger',        'Food',   50.00,  TRUE),
+  ('Pizza',         'Food',   100.00, TRUE),
+  ('Fried Chicken', 'Food',   30.00,  TRUE),
+  ('Hotdog',        'Food',   30.00,  TRUE),
+  ('Matcha',        'Drinks', 70.00,  TRUE),
+  ('Frappe',        'Drinks', 100.00, TRUE),
+  ('Juice',         'Drinks', 20.00,  TRUE),
+  ('Ice Cream',     'Snacks', 30.00,  TRUE),
+  ('Candies',       'Snacks', 20.00,  TRUE),
+  ('Gummy Bear',    'Snacks', 20.00,  TRUE),
+  ('Marshmallows',  'Snacks', 30.00,  TRUE)
+ON CONFLICT DO NOTHING;
