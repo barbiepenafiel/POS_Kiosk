@@ -144,6 +144,8 @@ supabase/
 
 ---
 
-## Author
+## Authors
 
-**Barbie Penafiel** — IT415 Practical Exam
+**Barbie Penafiel, 
+Christian Jericho Loquillano,  
+ Kervin Remonde** — IT415 Practical Exam
