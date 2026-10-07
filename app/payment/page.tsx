@@ -123,6 +123,22 @@ export default function PaymentPage() {
         </PaymentSuccessOverlay>
       )}
 
+      {processing && !success && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+        >
+          <div className="flex flex-col items-center gap-3 rounded-kiosk border border-line bg-surface px-8 py-6 text-center shadow-modal">
+            <div className="h-11 w-11 animate-spin rounded-full border-4 border-line border-t-brand" />
+            <p className="text-base font-bold text-ink">Saving your order…</p>
+            <p className="text-xs font-medium text-ink-faint">
+              Please wait, this only takes a moment.
+            </p>
+          </div>
+        </div>
+      )}
+
       <KioskHeader step={3} />
 
       <main className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col gap-3 px-4 py-4 sm:px-6">
