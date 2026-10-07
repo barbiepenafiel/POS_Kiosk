@@ -25,20 +25,23 @@ export default function Toast({
     return () => clearTimeout(timer);
   }, [duration, onClose]);
 
-  const bg =
+  const styles =
     type === "success"
-      ? "bg-green-500"
+      ? { bar: "bg-gradient-to-r from-blue-800 to-slate-800", icon: "✓", accent: "text-yellow-300" }
       : type === "error"
-      ? "bg-red-500"
-      : "bg-blue-500";
+      ? { bar: "bg-gradient-to-r from-red-700 to-red-800", icon: "✕", accent: "text-red-200" }
+      : { bar: "bg-gradient-to-r from-blue-700 to-blue-900", icon: "ℹ", accent: "text-blue-200" };
 
   return (
     <div
-      className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 px-6 py-4 rounded-2xl text-white text-lg font-semibold shadow-2xl transition-all duration-300 ${bg} ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+      className={`fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 pl-4 pr-6 py-3 rounded-2xl text-white shadow-2xl border border-white/10 backdrop-blur transition-all duration-300 ${styles.bar} ${
+        visible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-3 scale-95"
       }`}
     >
-      {message}
+      <span className={`w-7 h-7 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm flex-shrink-0 ${styles.accent}`}>
+        {styles.icon}
+      </span>
+      <span className="text-sm font-semibold tracking-wide">{message}</span>
     </div>
   );
 }

@@ -46,32 +46,32 @@ export default function CashPayment({ totalAmount, onConfirm }: Props) {
   const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "Clear", "0", "⌫"];
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-3">
       <div className="grid grid-cols-4 gap-2">
         {QUICK.map((q) => (
           <button
             key={q.label}
             onClick={() => setInput(q.value.toFixed(2))}
-            className="py-3 rounded-xl bg-blue-50 text-blue-700 font-semibold text-sm hover:bg-blue-100 active:bg-blue-200 transition-colors"
+            className="py-2 rounded-xl bg-blue-50 text-blue-700 font-semibold text-sm hover:bg-blue-100 active:bg-blue-200 transition-colors"
           >
             {q.label}
           </button>
         ))}
       </div>
 
-      <div className="bg-gray-50 rounded-2xl p-4 text-center">
-        <p className="text-sm text-gray-500 mb-1">Amount Paid</p>
-        <p className="text-4xl font-extrabold text-gray-800 min-h-[3rem]">
+      <div className="bg-gray-50 rounded-xl px-4 py-2 text-center">
+        <p className="text-xs text-gray-500">Amount Paid</p>
+        <p className="text-3xl font-extrabold text-gray-800">
           ₱{input || "0.00"}
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2">
         {KEYS.map((k) => (
           <button
             key={k}
             onClick={() => handleKey(k)}
-            className={`py-4 rounded-2xl text-xl font-bold transition-all active:scale-95 ${
+            className={`py-3 rounded-xl text-lg font-bold transition-all active:scale-95 ${
               k === "Clear"
                 ? "bg-red-100 text-red-600 hover:bg-red-200"
                 : k === "⌫"
@@ -84,38 +84,26 @@ export default function CashPayment({ totalAmount, onConfirm }: Props) {
         ))}
       </div>
 
-      <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
-        <div className="flex justify-between">
-          <span className="text-gray-600">Amount Due</span>
+      <div className="bg-gray-50 rounded-xl px-4 py-2 flex gap-4 justify-between text-sm">
+        <div className="flex justify-between flex-1">
+          <span className="text-gray-500">Due</span>
           <span className="font-bold">{formatCurrency(totalAmount)}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">Amount Paid</span>
-          <span className="font-bold">{formatCurrency(amountPaid)}</span>
-        </div>
-        <div className="flex justify-between border-t pt-2">
-          <span className="font-bold text-lg">Change</span>
-          <span className={`font-extrabold text-xl ${isValid ? "text-green-600" : "text-red-500"}`}>
+        <div className="w-px bg-gray-200" />
+        <div className="flex justify-between flex-1">
+          <span className="font-bold">Change</span>
+          <span className={`font-extrabold ${isValid ? "text-green-600" : "text-red-400"}`}>
             {isValid ? formatCurrency(change) : "—"}
           </span>
         </div>
       </div>
 
-      {!isValid && amountPaid > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
-          <p className="text-red-600 font-semibold text-sm">Insufficient payment.</p>
-          <p className="text-red-500 text-xs mt-0.5">
-            Please enter at least {formatCurrency(totalAmount)}.
-          </p>
-        </div>
-      )}
-
       <button
         onClick={() => onConfirm(amountPaid)}
         disabled={!isValid}
-        className="w-full py-5 rounded-2xl text-xl font-extrabold text-white bg-green-600 hover:bg-green-700 active:bg-green-800 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors shadow-lg"
+        className="w-full py-3.5 rounded-2xl text-base font-extrabold text-white bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-slate-900 disabled:bg-gradient-to-r disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-all shadow-lg"
       >
-        Pay Now
+        {isValid ? `Confirm Payment · ${formatCurrency(amountPaid)}` : "Enter Amount to Pay"}
       </button>
     </div>
   );

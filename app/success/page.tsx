@@ -1,9 +1,14 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
+import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { formatCurrency } from "@/lib/utils";
-import ProgressIndicator from "@/components/ProgressIndicator";
+import { fetchTransactionWithItems } from "@/lib/db";
+import { Transaction } from "@/types";
+import KioskHeader from "@/components/KioskHeader";
 
 function SuccessContent() {
   const router = useRouter();
@@ -12,19 +17,21 @@ function SuccessContent() {
   const txnId = params.get("txn") ?? "";
   const amountPaid = parseFloat(params.get("paid") ?? "0");
   const changeAmount = parseFloat(params.get("change") ?? "0");
-  const method = (params.get("method") ?? "Cash") as string;
+  const method = params.get("method") ?? "Cash";
+
+  const [txn, setTxn] = useState<Transaction | null>(null);
+
+  useEffect(() => {
+    if (txnId) {
+      fetchTransactionWithItems(txnId)
+        .then((data) => setTxn(data.transaction))
+        .catch(() => {});
+    }
+  }, [txnId]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-green-50 to-emerald-100">
-      <header className="bg-white shadow-sm px-6 py-4">
-        <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="text-center sm:text-left">
-            <h1 className="text-2xl font-extrabold text-blue-700">CS Campus Store</h1>
-            <p className="text-sm text-gray-500">Self-Service Kiosk</p>
-          </div>
-          <ProgressIndicator currentStep={4} />
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-100 via-blue-50 to-blue-100">
+      <KioskHeader step={4} />
 
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8 flex flex-col items-center gap-6">
         <div className="text-center">
@@ -34,7 +41,18 @@ function SuccessContent() {
         </div>
 
         <div className="w-full bg-white rounded-2xl shadow-lg p-6 space-y-4">
+          {txn && (
+            <DetailRow
+              label="Transaction No."
+              value={txn.transaction_number}
+              valueClass="font-mono font-bold text-gray-800"
+            />
+          )}
           <DetailRow label="Payment Method" value={method} />
+          <DetailRow
+            label="Transaction Amount"
+            value={txn ? formatCurrency(txn.total_amount) : "—"}
+          />
           <DetailRow
             label="Amount Paid"
             value={formatCurrency(amountPaid)}
@@ -43,7 +61,7 @@ function SuccessContent() {
             <DetailRow
               label="Change"
               value={formatCurrency(changeAmount)}
-              valueClass="text-green-600 font-extrabold"
+              valueClass="text-green-600 font-extrabold text-lg"
             />
           )}
         </div>
@@ -53,7 +71,7 @@ function SuccessContent() {
             onClick={() => router.push(`/receipt/${txnId}`)}
             className="flex-1 py-5 rounded-2xl text-xl font-extrabold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-lg"
           >
-            View Receipt
+            View Receipt 🧾
           </button>
         </div>
       </main>

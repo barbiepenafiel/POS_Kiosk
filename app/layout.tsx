@@ -6,8 +6,8 @@ import { CartProvider } from "@/lib/CartContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CS Campus Store — Self-Service Kiosk",
-  description: "Touchscreen POS Kiosk for CS Campus Store",
+  title: "CampusTapXP — Self-Service Kiosk",
+  description: "Touchscreen POS Kiosk by CampusTapXP",
 };
 
 export default function RootLayout({

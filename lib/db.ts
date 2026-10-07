@@ -1,8 +1,9 @@
-import { supabase } from "./supabase";
+import { getSupabaseClient } from "./supabase";
 import { CartItem, PaymentMethod } from "@/types";
 import { generateTransactionNumber } from "./utils";
 
 export async function fetchProducts() {
+  const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from("products")
     .select("*")
@@ -21,6 +22,7 @@ export async function saveTransaction(
   amountPaid: number,
   changeAmount: number
 ) {
+  const supabase = getSupabaseClient();
   const transactionNumber = generateTransactionNumber();
 
   const { data: txn, error: txnError } = await supabase
@@ -57,6 +59,8 @@ export async function saveTransaction(
 }
 
 export async function fetchTransactionWithItems(transactionId: string) {
+  const supabase = getSupabaseClient();
+
   const { data: txn, error: txnError } = await supabase
     .from("transactions")
     .select("*")

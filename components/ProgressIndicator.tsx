@@ -21,23 +21,23 @@ export default function ProgressIndicator({ currentStep }: Props) {
         <div key={step.number} className="flex items-center">
           <div className="flex flex-col items-center">
             <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-colors ${
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
                 step.number < currentStep
-                  ? "bg-green-500 border-green-500 text-white"
+                  ? "bg-yellow-400 border-yellow-400 text-blue-900"
                   : step.number === currentStep
-                  ? "bg-blue-600 border-blue-600 text-white"
-                  : "bg-white border-gray-300 text-gray-400"
+                  ? "bg-white border-white text-blue-900"
+                  : "bg-white/10 border-white/30 text-white/40"
               }`}
             >
               {step.number < currentStep ? "✓" : step.number}
             </div>
             <span
-              className={`mt-1 text-xs font-medium ${
+              className={`mt-1 text-xs font-semibold ${
                 step.number === currentStep
-                  ? "text-blue-600"
+                  ? "text-white"
                   : step.number < currentStep
-                  ? "text-green-600"
-                  : "text-gray-400"
+                  ? "text-yellow-300"
+                  : "text-white/40"
               }`}
             >
               {step.label}
@@ -45,8 +45,8 @@ export default function ProgressIndicator({ currentStep }: Props) {
           </div>
           {idx < STEPS.length - 1 && (
             <div
-              className={`h-0.5 w-12 mx-1 mb-4 transition-colors ${
-                step.number < currentStep ? "bg-green-500" : "bg-gray-200"
+              className={`h-0.5 w-10 mx-1 mb-4 transition-colors ${
+                step.number < currentStep ? "bg-yellow-400" : "bg-white/20"
               }`}
             />
           )}

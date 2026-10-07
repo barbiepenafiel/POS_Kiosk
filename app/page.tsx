@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Product } from "@/types";
@@ -8,7 +10,7 @@ import { useCart } from "@/lib/CartContext";
 import ProductCard from "@/components/ProductCard";
 import CartPanel from "@/components/CartPanel";
 import CategoryFilter from "@/components/CategoryFilter";
-import ProgressIndicator from "@/components/ProgressIndicator";
+import KioskHeader from "@/components/KioskHeader";
 import Toast from "@/components/Toast";
 
 type Category = "All" | "Drinks" | "Food" | "Snacks";
@@ -40,7 +42,6 @@ export default function OrderPage() {
 
   const handleAdd = (product: Product) => {
     addItem(product);
-    showToast(`${product.name} added to your order`);
   };
 
   const filtered =
@@ -52,7 +53,7 @@ export default function OrderPage() {
     items.find((i) => i.product.id === productId)?.quantity ?? 0;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-slate-100">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-100 via-blue-50 to-blue-100">
       {toast && (
         <Toast
           message={toast.message}
@@ -61,16 +62,7 @@ export default function OrderPage() {
         />
       )}
 
-      {/* Header */}
-      <header className="bg-white shadow-sm px-6 py-4">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="text-center sm:text-left">
-            <h1 className="text-2xl font-extrabold text-blue-700">CS Campus Store</h1>
-            <p className="text-sm text-gray-500">Self-Service Kiosk</p>
-          </div>
-          <ProgressIndicator currentStep={1} />
-        </div>
-      </header>
+      <KioskHeader step={1} />
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 flex flex-col lg:flex-row gap-6">
         {/* Products section */}
@@ -81,9 +73,9 @@ export default function OrderPage() {
           />
 
           {loading && (
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center py-20">
               <div className="text-center">
-                <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-3" />
+                <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-3" />
                 <p className="text-gray-500">Loading products...</p>
               </div>
             </div>

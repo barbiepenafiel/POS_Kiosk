@@ -59,7 +59,7 @@ export default function CartPanel({
                     </span>
                     <button
                       onClick={() => increaseQty(item.product.id)}
-                      className="w-9 h-9 rounded-lg bg-blue-100 hover:bg-blue-200 active:bg-blue-300 flex items-center justify-center text-lg font-bold text-blue-700 transition-colors"
+                      className="w-9 h-9 rounded-lg bg-blue-100 hover:bg-blue-200 active:bg-blue-300 flex items-center justify-center text-lg font-bold text-blue-800 transition-colors"
                     >
                       +
                     </button>
@@ -84,14 +84,14 @@ export default function CartPanel({
       <div className="px-5 py-4 border-t border-gray-100 bg-gray-50">
         <div className="flex justify-between items-center mb-4">
           <span className="text-base font-bold text-gray-700">Total</span>
-          <span className="text-2xl font-extrabold text-blue-700">
+          <span className="text-2xl font-extrabold text-blue-900">
             {formatCurrency(totalAmount)}
           </span>
         </div>
         <button
           onClick={onProceed}
           disabled={items.length === 0}
-          className="w-full py-4 rounded-2xl text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors shadow-md"
+          className="w-full py-4 rounded-2xl text-lg font-bold text-white bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-slate-900 active:scale-95 disabled:bg-gray-200 disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-all shadow-lg"
         >
           {items.length === 0 ? "Add items to proceed" : "Proceed to Payment →"}
         </button>
