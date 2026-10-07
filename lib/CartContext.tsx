@@ -14,12 +14,18 @@ type CartAction =
   | { type: "DECREASE_QTY"; productId: string }
   | { type: "CLEAR_CART" };
 
+// True when the cart already holds every unit in stock (no limit if stock is unknown)
+function atStockLimit(product: Product, quantity: number): boolean {
+  return product.stock != null && quantity >= product.stock;
+}
+
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "ADD_ITEM": {
       const existing = state.items.find(
         (i) => i.product.id === action.product.id
       );
+      if (atStockLimit(action.product, existing?.quantity ?? 0)) return state;
       if (existing) {
         return {
           items: state.items.map((i) =>
@@ -36,7 +42,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     case "INCREASE_QTY":
       return {
         items: state.items.map((i) =>
-          i.product.id === action.productId
+          i.product.id === action.productId && !atStockLimit(i.product, i.quantity)
             ? { ...i, quantity: i.quantity + 1 }
             : i
         ),

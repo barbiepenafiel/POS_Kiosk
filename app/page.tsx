@@ -41,6 +41,10 @@ export default function OrderPage() {
   }, []);
 
   const handleAdd = (product: Product) => {
+    if (product.stock != null && getCartQty(product.id) >= product.stock) {
+      showToast(`Only ${product.stock} ${product.name} in stock`, "info");
+      return;
+    }
     addItem(product);
   };
 

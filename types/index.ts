@@ -5,6 +5,8 @@ export interface Product {
   price: number;
   image_url: string | null;
   available: boolean;
+  // From the database once supabase/add-stock.sql has been run, otherwise a local count
+  stock?: number | null;
   created_at: string;
 }
 
