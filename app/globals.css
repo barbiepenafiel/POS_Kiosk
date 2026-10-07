@@ -2,6 +2,96 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===========================================================================
+   Design tokens — one set of semantic names, two themes.
+   Light is the default (kiosk screens live under bright campus lighting).
+   Every component consumes these via Tailwind's `bg-surface`, `text-ink`, etc.
+   =========================================================================== */
+
+:root {
+  /* Base canvas + raised panels */
+  --app-bg: 218 100% 97%;
+  --app-bg-accent: 214 95% 93%;
+  --surface: 0 0% 100%;
+  --surface-sunken: 214 32% 96%;
+  --surface-raised: 0 0% 100%;
+  --border: 214 32% 89%;
+  --border-strong: 214 25% 80%;
+
+  /* Text */
+  --ink: 222 47% 15%;
+  --ink-soft: 215 20% 42%;
+  --ink-faint: 215 16% 60%;
+  --ink-invert: 0 0% 100%;
+
+  /* Brand — the deep campus blue the kiosk is built around */
+  --brand: 224 76% 33%;
+  --brand-strong: 226 71% 24%;
+  --brand-soft: 214 95% 93%;
+  --brand-ink: 224 76% 28%;
+  --accent: 45 93% 58%;
+
+  /* Status */
+  --success: 142 71% 40%;
+  --success-soft: 141 79% 93%;
+  --success-ink: 143 64% 28%;
+  --danger: 0 72% 48%;
+  --danger-soft: 0 86% 95%;
+  --danger-ink: 0 70% 38%;
+  --warning: 38 92% 46%;
+  --warning-soft: 48 96% 90%;
+  --warning-ink: 26 90% 34%;
+
+  /* Header is a fixed dark bar in both themes, so it owns its own tokens */
+  --header-from: 226 71% 18%;
+  --header-via: 224 64% 25%;
+  --header-to: 217 33% 27%;
+
+  --ring: 224 76% 48%;
+  --overlay: 222 47% 11%;
+  --shadow-color: 224 45% 30%;
+}
+
+.dark {
+  --app-bg: 222 47% 9%;
+  --app-bg-accent: 224 45% 14%;
+  --surface: 222 40% 14%;
+  --surface-sunken: 222 40% 11%;
+  --surface-raised: 221 36% 18%;
+  --border: 220 28% 24%;
+  --border-strong: 220 24% 34%;
+
+  --ink: 210 40% 96%;
+  --ink-soft: 215 20% 72%;
+  --ink-faint: 215 18% 58%;
+  --ink-invert: 222 47% 11%;
+
+  --brand: 214 95% 68%;
+  --brand-strong: 213 94% 78%;
+  --brand-soft: 224 45% 22%;
+  --brand-ink: 213 94% 78%;
+  --accent: 45 93% 62%;
+
+  --success: 142 69% 52%;
+  --success-soft: 150 40% 18%;
+  --success-ink: 141 72% 72%;
+  --danger: 0 84% 65%;
+  --danger-soft: 0 40% 20%;
+  --danger-ink: 0 90% 79%;
+  --warning: 38 92% 60%;
+  --warning-soft: 30 40% 20%;
+  --warning-ink: 46 96% 76%;
+
+  --header-from: 222 47% 11%;
+  --header-via: 223 43% 15%;
+  --header-to: 220 33% 19%;
+
+  --ring: 213 94% 68%;
+  --overlay: 222 60% 4%;
+  --shadow-color: 222 70% 2%;
+}
+
+/* Kill tap highlight + scrollbars for a true kiosk feel */
 *,
 *::-webkit-scrollbar {
   -webkit-tap-highlight-color: transparent;
@@ -16,15 +106,84 @@
 html,
 body {
   height: 100%;
-  background-color: #f0f4f8;
   touch-action: manipulation;
 }
 
+body {
+  background-color: hsl(var(--app-bg));
+  color: hsl(var(--ink));
+}
+
+/* Theme swap should feel like a dimmer, not a flash. Transitions are opt-out
+   on transform-heavy elements so animations stay crisp. */
+body,
+body * {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body,
+  body * {
+    transition-duration: 0ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Print: the receipt must always come out dark-on-white, even in dark mode.
+   We re-point the light tokens and force plain backgrounds.
+   --------------------------------------------------------------------------- */
 @media print {
   .no-print {
     display: none !important;
   }
+
+  :root,
+  .dark {
+    --app-bg: 0 0% 100%;
+    --app-bg-accent: 0 0% 100%;
+    --surface: 0 0% 100%;
+    --surface-sunken: 0 0% 96%;
+    --surface-raised: 0 0% 100%;
+    --border: 0 0% 80%;
+    --border-strong: 0 0% 60%;
+    --ink: 0 0% 0%;
+    --ink-soft: 0 0% 25%;
+    --ink-faint: 0 0% 40%;
+    --ink-invert: 0 0% 100%;
+    --brand: 0 0% 10%;
+    --brand-strong: 0 0% 0%;
+    --brand-soft: 0 0% 96%;
+    --brand-ink: 0 0% 10%;
+    --success: 0 0% 20%;
+    --success-soft: 0 0% 96%;
+    --success-ink: 0 0% 10%;
+    --header-from: 0 0% 100%;
+    --header-via: 0 0% 100%;
+    --header-to: 0 0% 100%;
+  }
+
+  html,
   body {
-    background: white;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Receipt header prints as plain text, not a dark ink-eating block */
+  #receipt {
+    box-shadow: none !important;
+    border: 1px solid #999 !important;
+  }
+
+  #receipt .receipt-banner {
+    background: #fff !important;
+    color: #000 !important;
+    border-bottom: 2px solid #000 !important;
+  }
+
+  #receipt .receipt-banner * {
+    color: #000 !important;
   }
 }

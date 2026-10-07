@@ -1,4 +1,5 @@
 import ProgressIndicator from "@/components/ProgressIndicator";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface Props {
   step: 1 | 2 | 3 | 4;
@@ -6,30 +7,41 @@ interface Props {
 
 export default function KioskHeader({ step }: Props) {
   return (
-    <header className="relative bg-gradient-to-r from-blue-950 via-blue-900 to-slate-800 shadow-lg px-6 py-4 overflow-hidden">
-      {/* Decorative blobs */}
-      <div className="absolute -top-6 -left-6 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-      <div className="absolute -bottom-8 right-10 w-40 h-40 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
+    <header className="relative flex-shrink-0 overflow-hidden bg-gradient-to-r from-header-from via-header-via to-header-to shadow-lift">
+      {/* Soft depth, purely decorative */}
+      <div className="pointer-events-none absolute -left-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-12 right-16 w-48 h-48 rounded-full bg-brand/25 blur-3xl" />
 
-      <div className="relative max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-        {/* Brand */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center shadow-inner text-xl">
-            ⚡
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:justify-between">
+        {/* Row 1: brand + theme toggle. Toggle is top-right on every screen. */}
+        <div className="flex w-full items-center justify-between gap-3 lg:w-auto">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/15 text-xl ring-1 ring-inset ring-white/20 backdrop-blur">
+              ⚡
+            </div>
+            <div className="leading-none">
+              <h1 className="text-xl font-black tracking-tight text-white sm:text-2xl">
+                CampusTap<span className="text-accent">XP</span>
+              </h1>
+              <p className="mt-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-white/60">
+                Self-Service Kiosk
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-black text-white tracking-tight leading-none">
-              CampusTap<span className="text-yellow-300">XP</span>
-            </h1>
-            <p className="text-blue-200 text-xs font-medium tracking-widest uppercase mt-0.5">
-              Self-Service Kiosk
-            </p>
+
+          <div className="lg:hidden">
+            <ThemeToggle />
           </div>
         </div>
 
-        {/* Progress */}
-        <div className="bg-white/10 backdrop-blur rounded-2xl px-4 py-2">
-          <ProgressIndicator currentStep={step} />
+        {/* Row 2 on mobile / right side on desktop */}
+        <div className="flex w-full items-center justify-center gap-3 lg:w-auto">
+          <div className="rounded-kiosk bg-white/10 px-3 py-2 ring-1 ring-inset ring-white/10 backdrop-blur sm:px-4">
+            <ProgressIndicator currentStep={step} />
+          </div>
+          <div className="hidden lg:block">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </header>

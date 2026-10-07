@@ -10,13 +10,16 @@ interface Props {
 
 export default function CashPayment({ totalAmount, onConfirm }: Props) {
   const [input, setInput] = useState("");
+  const [shortfall, setShortfall] = useState(false);
 
   const amountPaid = parseFloat(input) || 0;
   const change = amountPaid - totalAmount;
-  const isValid = amountPaid >= totalAmount;
+  const isValid = input !== "" && amountPaid >= totalAmount;
+  const isShort = input !== "" && amountPaid < totalAmount;
 
   const handleKey = (key: string) => {
-    if (key === "Clear") {
+    setShortfall(false);
+    if (key === "C") {
       setInput("");
       return;
     }
@@ -29,81 +32,138 @@ export default function CashPayment({ totalAmount, onConfirm }: Props) {
       setInput((prev) => (prev === "" ? "0." : prev + "."));
       return;
     }
-    if (input.length >= 8) return;
+    if (input.replace(".", "").length >= 8) return;
     const next = input + key;
-    if (/^\d*\.?\d{0,2}$/.test(next)) {
-      setInput(next);
-    }
+    if (/^\d*\.?\d{0,2}$/.test(next)) setInput(next);
   };
 
   const QUICK = [
     { label: "Exact", value: totalAmount },
-    { label: "₱200", value: 200 },
+    { label: "₱100", value: 100 },
     { label: "₱500", value: 500 },
-    { label: "₱1,000", value: 1000 },
-  ];
+    { label: "₱1000", value: 1000 },
+  ].filter((q) => q.value >= totalAmount);
 
-  const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "Clear", "0", "⌫"];
+  const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "⌫"];
+
+  const handleConfirm = () => {
+    if (!isValid) {
+      setShortfall(true);
+      return;
+    }
+    onConfirm(amountPaid);
+  };
 
   return (
     <div className="flex flex-col gap-3">
+      {/* Quick amounts — only ones that actually cover the bill */}
       <div className="grid grid-cols-4 gap-2">
         {QUICK.map((q) => (
           <button
             key={q.label}
-            onClick={() => setInput(q.value.toFixed(2))}
-            className="py-2 rounded-xl bg-blue-50 text-blue-700 font-semibold text-sm hover:bg-blue-100 active:bg-blue-200 transition-colors"
+            type="button"
+            onClick={() => {
+              setInput(q.value.toFixed(2));
+              setShortfall(false);
+            }}
+            className="flex min-h-touch items-center justify-center rounded-xl bg-brand-soft px-2 text-sm font-bold text-brand-ink transition-opacity active:opacity-70"
           >
             {q.label}
           </button>
         ))}
       </div>
 
-      <div className="bg-gray-50 rounded-xl px-4 py-2 text-center">
-        <p className="text-xs text-gray-500">Amount Paid</p>
-        <p className="text-3xl font-extrabold text-gray-800">
+      {/* Amount display */}
+      <div
+        className={`rounded-kiosk border-2 bg-surface-sunken px-4 py-2.5 text-center ${
+          isShort ? "border-danger" : "border-line"
+        }`}
+      >
+        <p className="text-[0.65rem] font-bold uppercase tracking-wider text-ink-faint">
+          Amount Paid
+        </p>
+        <p
+          aria-live="polite"
+          className="text-3xl font-black tabular-nums text-ink"
+        >
           ₱{input || "0.00"}
         </p>
       </div>
 
+      {/* Numpad */}
       <div className="grid grid-cols-3 gap-2">
         {KEYS.map((k) => (
           <button
             key={k}
+            type="button"
+            aria-label={k === "⌫" ? "Backspace" : k}
             onClick={() => handleKey(k)}
-            className={`py-3 rounded-xl text-lg font-bold transition-all active:scale-95 ${
-              k === "Clear"
-                ? "bg-red-100 text-red-600 hover:bg-red-200"
-                : k === "⌫"
-                ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
-                : "bg-white text-gray-800 shadow-sm hover:bg-gray-50 border border-gray-200"
+            className={`flex min-h-[3.25rem] items-center justify-center rounded-xl text-xl font-bold transition-transform active:scale-95 ${
+              k === "⌫"
+                ? "bg-warning-soft text-warning-ink"
+                : "border border-line bg-surface text-ink"
             }`}
           >
             {k}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => handleKey("C")}
+          className="col-span-3 flex min-h-touch items-center justify-center rounded-xl bg-danger-soft text-base font-bold text-danger-ink transition-transform active:scale-95"
+        >
+          Clear
+        </button>
       </div>
 
-      <div className="bg-gray-50 rounded-xl px-4 py-2 flex gap-4 justify-between text-sm">
-        <div className="flex justify-between flex-1">
-          <span className="text-gray-500">Due</span>
-          <span className="font-bold">{formatCurrency(totalAmount)}</span>
+      {/* Due / change */}
+      <div className="flex items-stretch gap-3 rounded-kiosk border border-line bg-surface-sunken px-4 py-2.5 text-sm">
+        <div className="flex flex-1 justify-between gap-2">
+          <span className="font-medium text-ink-soft">Due</span>
+          <span className="font-extrabold tabular-nums text-ink">
+            {formatCurrency(totalAmount)}
+          </span>
         </div>
-        <div className="w-px bg-gray-200" />
-        <div className="flex justify-between flex-1">
-          <span className="font-bold">Change</span>
-          <span className={`font-extrabold ${isValid ? "text-green-600" : "text-red-400"}`}>
+        <div className="w-px bg-line" />
+        <div className="flex flex-1 justify-between gap-2">
+          <span className="font-medium text-ink-soft">Change</span>
+          <span
+            className={`font-extrabold tabular-nums ${
+              isValid ? "text-success-ink" : "text-ink-faint"
+            }`}
+          >
             {isValid ? formatCurrency(change) : "—"}
           </span>
         </div>
       </div>
 
+      {/* Insufficient-cash message */}
+      {(isShort || shortfall) && (
+        <p
+          role="alert"
+          className="rounded-xl bg-danger-soft px-4 py-2.5 text-center text-sm font-bold text-danger-ink"
+        >
+          {input === ""
+            ? "Please enter the amount received."
+            : `Insufficient amount — ${formatCurrency(
+                totalAmount - amountPaid,
+              )} short.`}
+        </p>
+      )}
+
       <button
-        onClick={() => onConfirm(amountPaid)}
-        disabled={!isValid}
-        className="w-full py-3.5 rounded-2xl text-base font-extrabold text-white bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-slate-900 disabled:bg-gradient-to-r disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-all shadow-lg"
+        type="button"
+        onClick={handleConfirm}
+        aria-disabled={!isValid}
+        className={`flex min-h-[3.25rem] w-full items-center justify-center rounded-kiosk px-4 text-base font-extrabold transition-transform active:scale-[0.98] ${
+          isValid
+            ? "bg-brand text-ink-invert shadow-card"
+            : "bg-surface text-ink-faint ring-1 ring-line"
+        }`}
       >
-        {isValid ? `Confirm Payment · ${formatCurrency(amountPaid)}` : "Enter Amount to Pay"}
+        {isValid
+          ? `Confirm Payment · ${formatCurrency(amountPaid)}`
+          : "Enter Amount to Pay"}
       </button>
     </div>
   );

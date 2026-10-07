@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Props {
   productName: string;
@@ -8,77 +8,51 @@ interface Props {
 }
 
 export default function OrderNotification({ productName, onClose }: Props) {
-  const [phase, setPhase] = useState<"enter" | "show" | "exit">("enter");
+  const [visible, setVisible] = useState(false);
 
+  const onCloseRef = useRef(onClose);
   useEffect(() => {
-    // enter → show after animation settles
-    const t1 = setTimeout(() => setPhase("show"), 50);
-    // show → exit after 1.8 s
-    const t2 = setTimeout(() => setPhase("exit"), 1850);
-    // unmount after exit animation
-    const t3 = setTimeout(onClose, 2200);
-    return () => [t1, t2, t3].forEach(clearTimeout);
+    onCloseRef.current = onClose;
   }, [onClose]);
 
-  const visible = phase === "show";
+  useEffect(() => {
+    const t1 = setTimeout(() => setVisible(true), 30);
+    const t2 = setTimeout(() => setVisible(false), 1850);
+    const t3 = setTimeout(() => onCloseRef.current(), 2200);
+    return () => [t1, t2, t3].forEach(clearTimeout);
+  }, []);
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center pointer-events-none transition-all duration-300 ${
+      role="status"
+      aria-live="polite"
+      className={`pointer-events-none fixed inset-0 z-[60] flex items-center justify-center transition-opacity duration-300 ${
         visible ? "opacity-100" : "opacity-0"
       }`}
     >
-      {/* Backdrop blur */}
-      <div
-        className={`absolute inset-0 bg-black/20 transition-opacity duration-300 ${
-          visible ? "opacity-100" : "opacity-0"
-        }`}
-      />
+      <div className="absolute inset-0 bg-overlay/40" />
 
-      {/* Card */}
       <div
-        className={`relative flex flex-col items-center gap-5 bg-white rounded-3xl shadow-2xl px-12 py-10 mx-4 max-w-sm w-full transition-all duration-300 ${
-          visible ? "scale-100 translate-y-0" : "scale-90 translate-y-6"
+        className={`relative mx-4 flex w-full max-w-sm flex-col items-center gap-4 rounded-3xl bg-surface px-10 py-8 shadow-modal transition-transform duration-300 ${
+          visible ? "translate-y-0 scale-100" : "translate-y-5 scale-95"
         }`}
       >
-        {/* Animated circle + checkmark */}
-        <div className="relative w-24 h-24">
-          {/* Pulse ring */}
-          <span
-            className={`absolute inset-0 rounded-full bg-green-200 transition-all duration-700 ${
-              visible ? "scale-125 opacity-0" : "scale-100 opacity-60"
-            }`}
-          />
-          {/* Green circle */}
-          <div className="w-24 h-24 rounded-full bg-green-500 flex items-center justify-center shadow-lg">
-            <svg
-              className={`w-12 h-12 text-white transition-all duration-500 ${
-                visible ? "scale-100 opacity-100" : "scale-50 opacity-0"
-              }`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={3}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-success shadow-card">
+          <svg
+            aria-hidden
+            className="h-10 w-10 text-white"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={3}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
         </div>
 
         <div className="text-center">
-          <p className="text-green-600 font-extrabold text-xl">Added to Order!</p>
-          <p className="text-gray-700 font-semibold text-lg mt-1">{productName}</p>
-          <p className="text-gray-400 text-sm mt-1">has been added to your cart</p>
-        </div>
-
-        {/* Progress bar */}
-        <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className={`h-full bg-green-500 rounded-full transition-all ease-linear ${
-              visible ? "w-0" : "w-full"
-            }`}
-            style={{ transitionDuration: visible ? "0ms" : "1800ms" }}
-          />
+          <p className="text-lg font-extrabold text-success-ink">Added to Order</p>
+          <p className="mt-1 text-base font-bold text-ink">{productName}</p>
         </div>
       </div>
     </div>

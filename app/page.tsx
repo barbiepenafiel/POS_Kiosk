@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Product } from "@/types";
 import { fetchProducts } from "@/lib/db";
@@ -15,11 +15,6 @@ import Toast from "@/components/Toast";
 
 type Category = "All" | "Drinks" | "Food" | "Snacks";
 
-interface ToastState {
-  message: string;
-  type: "success" | "error" | "info";
-}
-
 export default function OrderPage() {
   const router = useRouter();
   const { items, addItem, totalAmount } = useCart();
@@ -27,21 +22,28 @@ export default function OrderPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<Category>("All");
-  const [toast, setToast] = useState<ToastState | null>(null);
+  const [toast, setToast] = useState<{ message: string } | null>(null);
 
   useEffect(() => {
+    let active = true;
     fetchProducts()
-      .then(setProducts)
-      .catch(() => setError("Failed to load products. Please try again."))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const showToast = useCallback((message: string, type: ToastState["type"] = "success") => {
-    setToast({ message, type });
+      .then((data) => {
+        if (active) setProducts(data);
+      })
+      .catch(() => {
+        if (active) setError("Failed to load products. Please try again.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleAdd = (product: Product) => {
     addItem(product);
+    setToast({ message: `${product.name} added to order` });
   };
 
   const filtered =
@@ -53,67 +55,82 @@ export default function OrderPage() {
     items.find((i) => i.product.id === productId)?.quantity ?? 0;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-100 via-blue-50 to-blue-100">
+    <div className="flex h-screen flex-col overflow-hidden bg-gradient-to-br from-app via-app to-app-accent">
       {toast && (
         <Toast
           message={toast.message}
-          type={toast.type}
+          type="success"
+          duration={1600}
           onClose={() => setToast(null)}
         />
       )}
 
       <KioskHeader step={1} />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 flex flex-col lg:flex-row gap-6">
-        {/* Products section */}
-        <div className="flex-1 flex flex-col gap-4">
+      <main className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:gap-6">
+        {/* Catalog */}
+        <div className="flex min-h-0 flex-1 flex-col gap-3">
           <CategoryFilter
             selected={category}
-            onChange={(cat) => setCategory(cat as Category)}
+            onChange={(cat) => setCategory(cat)}
           />
 
           {loading && (
-            <div className="flex-1 flex items-center justify-center py-20">
-              <div className="text-center">
-                <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-3" />
-                <p className="text-gray-500">Loading products...</p>
+            <div className="flex flex-1 items-center justify-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="h-11 w-11 animate-spin rounded-full border-4 border-line border-t-brand" />
+                <p className="text-sm font-medium text-ink-soft">
+                  Loading products…
+                </p>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
-              <p className="text-red-600 font-semibold">{error}</p>
+            <div
+              role="alert"
+              className="rounded-kiosk border border-danger/40 bg-danger-soft p-5 text-center"
+            >
+              <p className="font-bold text-danger-ink">{error}</p>
             </div>
           )}
 
           {!loading && !error && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {filtered.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onAdd={handleAdd}
-                  cartQty={getCartQty(product.id)}
-                />
-              ))}
+            <div className="min-h-0 flex-1 overflow-y-auto pb-1">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+                {filtered.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAdd={handleAdd}
+                    cartQty={getCartQty(product.id)}
+                  />
+                ))}
+              </div>
+
               {filtered.length === 0 && (
-                <div className="col-span-full text-center py-16 text-gray-400">
-                  <p className="text-5xl mb-3">🔍</p>
-                  <p>No products in this category.</p>
+                <div className="flex flex-col items-center gap-2 py-16 text-ink-faint">
+                  <span aria-hidden className="text-4xl opacity-60">
+                    🔍
+                  </span>
+                  <p className="text-sm font-medium">
+                    No products in this category.
+                  </p>
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* Cart panel */}
-        <div className="w-full lg:w-80 xl:w-96 lg:sticky lg:top-6 lg:self-start">
-          <CartPanel
-            items={items}
-            totalAmount={totalAmount}
-            onProceed={() => router.push("/review")}
-          />
+        {/* Cart — full-height column on desktop, capped panel on mobile */}
+        <div className="flex max-h-[45vh] min-h-0 w-full flex-shrink-0 lg:max-h-none lg:w-80 xl:w-96">
+          <div className="min-h-0 w-full">
+            <CartPanel
+              items={items}
+              totalAmount={totalAmount}
+              onProceed={() => router.push("/review")}
+            />
+          </div>
         </div>
       </main>
     </div>

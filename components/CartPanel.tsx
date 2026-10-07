@@ -18,84 +18,109 @@ export default function CartPanel({
   showControls = true,
 }: Props) {
   const { increaseQty, decreaseQty, removeItem } = useCart();
+  const count = items.reduce((s, i) => s + i.quantity, 0);
+  const empty = items.length === 0;
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-      <div className="px-5 py-4 bg-gray-50 border-b border-gray-100">
-        <h2 className="text-lg font-bold text-gray-800">Your Order</h2>
-        <p className="text-sm text-gray-500">
-          {items.length === 0 ? "No items yet" : `${items.reduce((s, i) => s + i.quantity, 0)} item(s)`}
-        </p>
-      </div>
+    <section
+      aria-label="Your order"
+      className="flex h-full min-h-0 flex-col overflow-hidden rounded-kiosk border border-line bg-surface shadow-card"
+    >
+      <header className="flex flex-shrink-0 items-center justify-between gap-2 border-b border-line bg-surface-sunken px-5 py-3.5">
+        <div>
+          <h2 className="text-base font-bold text-ink">Your Order</h2>
+          <p className="text-xs font-medium text-ink-faint">
+            {empty ? "No items yet" : `${count} item${count === 1 ? "" : "s"}`}
+          </p>
+        </div>
+        <span aria-hidden className="text-2xl">
+          🛒
+        </span>
+      </header>
 
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-        {items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-32 text-gray-400">
-            <span className="text-4xl">🛒</span>
-            <p className="mt-2 text-sm">Tap a product to add it</p>
+      <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-4 py-3">
+        {empty ? (
+          <div className="flex h-32 flex-col items-center justify-center gap-2 text-ink-faint">
+            <span aria-hidden className="text-4xl opacity-60">
+              🛒
+            </span>
+            <p className="text-sm font-medium">Tap a product to add it</p>
           </div>
         ) : (
           items.map((item) => (
-            <div key={item.product.id} className="bg-gray-50 rounded-xl p-3">
-              <div className="flex justify-between items-start mb-2">
-                <p className="font-semibold text-gray-800 text-sm leading-tight flex-1 pr-2">
+            <article
+              key={item.product.id}
+              className="rounded-xl border border-line bg-surface-sunken p-3"
+            >
+              <div className="mb-2 flex items-start justify-between gap-2">
+                <p className="flex-1 text-sm font-bold leading-tight text-ink">
                   {item.product.name}
                 </p>
-                <p className="text-blue-700 font-bold text-sm whitespace-nowrap">
+                <p className="whitespace-nowrap text-sm font-extrabold text-brand-ink">
                   {formatCurrency(item.product.price * item.quantity)}
                 </p>
               </div>
+
               {showControls ? (
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1">
                     <button
+                      type="button"
+                      aria-label={`Decrease ${item.product.name}`}
                       onClick={() => decreaseQty(item.product.id)}
-                      className="w-9 h-9 rounded-lg bg-gray-200 hover:bg-gray-300 active:bg-gray-400 flex items-center justify-center text-lg font-bold text-gray-700 transition-colors"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl border border-line bg-surface text-xl font-bold text-ink transition-colors active:bg-surface-sunken"
                     >
                       −
                     </button>
-                    <span className="w-8 text-center font-bold text-gray-800">
+                    <span
+                      aria-live="polite"
+                      className="w-9 text-center text-base font-extrabold text-ink"
+                    >
                       {item.quantity}
                     </span>
                     <button
+                      type="button"
+                      aria-label={`Increase ${item.product.name}`}
                       onClick={() => increaseQty(item.product.id)}
-                      className="w-9 h-9 rounded-lg bg-blue-100 hover:bg-blue-200 active:bg-blue-300 flex items-center justify-center text-lg font-bold text-blue-800 transition-colors"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand text-xl font-bold text-ink-invert transition-opacity active:opacity-80"
                     >
                       +
                     </button>
                   </div>
                   <button
+                    type="button"
                     onClick={() => removeItem(item.product.id)}
-                    className="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
+                    className="flex min-h-touch items-center rounded-xl px-3 text-xs font-bold text-danger-ink transition-colors active:bg-danger-soft"
                   >
                     Remove
                   </button>
                 </div>
               ) : (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs font-medium text-ink-soft">
                   {item.quantity} × {formatCurrency(item.product.price)}
                 </p>
               )}
-            </div>
+            </article>
           ))
         )}
       </div>
 
-      <div className="px-5 py-4 border-t border-gray-100 bg-gray-50">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-base font-bold text-gray-700">Total</span>
-          <span className="text-2xl font-extrabold text-blue-900">
+      <footer className="flex-shrink-0 border-t border-line bg-surface-sunken px-5 py-4">
+        <div className="mb-3 flex items-baseline justify-between">
+          <span className="text-sm font-bold text-ink-soft">Total</span>
+          <span className="text-2xl font-black text-brand-ink">
             {formatCurrency(totalAmount)}
           </span>
         </div>
         <button
+          type="button"
           onClick={onProceed}
-          disabled={items.length === 0}
-          className="w-full py-4 rounded-2xl text-lg font-bold text-white bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-slate-900 active:scale-95 disabled:bg-gray-200 disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-all shadow-lg"
+          disabled={empty}
+          className="flex min-h-[3.25rem] w-full items-center justify-center rounded-kiosk bg-brand px-4 text-base font-extrabold text-ink-invert shadow-card transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-surface disabled:text-ink-faint disabled:shadow-none disabled:ring-1 disabled:ring-line"
         >
-          {items.length === 0 ? "Add items to proceed" : "Proceed to Payment →"}
+          {empty ? "Add items to proceed" : "Review Order →"}
         </button>
-      </div>
-    </div>
+      </footer>
+    </section>
   );
 }

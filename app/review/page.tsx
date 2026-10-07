@@ -19,67 +19,80 @@ export default function ReviewPage() {
   if (items.length === 0) return null;
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-slate-100 via-blue-50 to-blue-100 overflow-hidden">
+    <div className="flex h-screen flex-col overflow-hidden bg-gradient-to-br from-app via-app to-app-accent">
       <KioskHeader step={2} />
 
-      <div className="flex-1 overflow-hidden flex flex-col max-w-3xl mx-auto w-full px-4 py-3 gap-3">
-        {/* Title */}
-        <div className="text-center">
-          <h2 className="text-2xl font-extrabold text-gray-800">Review Your Order</h2>
-          <p className="text-gray-400 text-sm">{totalItems} item(s)</p>
+      <main className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col gap-3 px-4 py-4 sm:px-6">
+        <div className="flex-shrink-0 text-center">
+          <h2 className="text-xl font-black text-ink sm:text-2xl">
+            Review Your Order
+          </h2>
+          <p className="mt-0.5 text-sm font-medium text-ink-faint">
+            {totalItems} item{totalItems === 1 ? "" : "s"} · tap Back to make changes
+          </p>
         </div>
 
-        {/* Table */}
-        <div className="flex-1 overflow-hidden flex flex-col bg-white rounded-2xl shadow-md border border-gray-100 min-h-0">
-          {/* Header row */}
-          <div className="px-5 py-2.5 bg-gray-50 border-b border-gray-100 flex-shrink-0 grid grid-cols-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
-            <span className="col-span-2">Item</span>
-            <span className="text-center">Qty</span>
-            <span className="text-right">Subtotal</span>
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-kiosk border border-line bg-surface shadow-card">
+          <div className="grid flex-shrink-0 grid-cols-[1fr_auto_auto] gap-3 border-b border-line bg-surface-sunken px-5 py-2.5 text-[0.65rem] font-bold uppercase tracking-wider text-ink-faint">
+            <span>Item</span>
+            <span className="w-12 text-center">Qty</span>
+            <span className="w-24 text-right">Subtotal</span>
           </div>
 
-          {/* Items */}
-          <div className="flex-1 overflow-hidden divide-y divide-gray-50">
+          <div className="min-h-0 flex-1 divide-y divide-line overflow-y-auto">
             {items.map((item) => (
-              <div key={item.product.id} className="px-5 py-3 grid grid-cols-4 items-center">
-                <div className="col-span-2">
-                  <p className="font-semibold text-gray-800 text-sm">{item.product.name}</p>
-                  <p className="text-xs text-gray-400">{formatCurrency(item.product.price)} each</p>
+              <div
+                key={item.product.id}
+                className="grid grid-cols-[1fr_auto_auto] items-center gap-3 px-5 py-3"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-ink">
+                    {item.product.name}
+                  </p>
+                  <p className="text-xs font-medium text-ink-faint">
+                    {formatCurrency(item.product.price)} each
+                  </p>
                 </div>
-                <p className="text-center font-bold text-gray-700">{item.quantity}</p>
-                <p className="text-right font-bold text-blue-900 text-sm">
+                <p className="w-12 text-center text-base font-extrabold text-ink">
+                  {item.quantity}
+                </p>
+                <p className="w-24 text-right text-sm font-extrabold text-brand-ink">
                   {formatCurrency(item.product.price * item.quantity)}
                 </p>
               </div>
             ))}
           </div>
 
-          {/* Total row */}
-          <div className="flex-shrink-0 px-5 py-3 bg-blue-50 border-t border-blue-100 flex justify-between items-center">
+          <div className="flex flex-shrink-0 items-center justify-between gap-3 border-t border-line bg-brand-soft px-5 py-3.5">
             <div>
-              <p className="text-xs text-gray-500">{totalItems} item(s)</p>
-              <p className="font-bold text-gray-700 text-sm">Order Total</p>
+              <p className="text-xs font-medium text-ink-soft">
+                {totalItems} item{totalItems === 1 ? "" : "s"}
+              </p>
+              <p className="text-sm font-bold text-ink">Order Total</p>
             </div>
-            <p className="text-2xl font-extrabold text-blue-900">{formatCurrency(totalAmount)}</p>
+            <p className="text-2xl font-black text-brand-ink sm:text-3xl">
+              {formatCurrency(totalAmount)}
+            </p>
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="flex-shrink-0 flex gap-3">
+        <div className="flex flex-shrink-0 gap-3">
           <button
-            onClick={() => router.back()}
-            className="flex-1 py-3.5 rounded-2xl text-base font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+            type="button"
+            onClick={() => router.push("/")}
+            className="flex min-h-[3.25rem] flex-1 items-center justify-center rounded-kiosk border-2 border-line bg-surface text-base font-bold text-ink transition-colors active:bg-surface-sunken"
           >
             ← Back
           </button>
           <button
+            type="button"
             onClick={() => router.push("/payment")}
-            className="flex-[2] py-3.5 rounded-2xl text-base font-bold text-white bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-slate-900 transition-all shadow-lg"
+            className="flex min-h-[3.25rem] flex-[2] items-center justify-center rounded-kiosk bg-brand text-base font-extrabold text-ink-invert shadow-card transition-transform active:scale-[0.98]"
           >
             Continue to Payment →
           </button>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

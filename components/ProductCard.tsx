@@ -25,24 +25,39 @@ interface Props {
 }
 
 export default function ProductCard({ product, onAdd, cartQty }: Props) {
-  const emoji = PRODUCT_EMOJI[product.name] ?? CATEGORY_EMOJI[product.category] ?? "🛒";
+  const emoji =
+    PRODUCT_EMOJI[product.name] ?? CATEGORY_EMOJI[product.category] ?? "🛒";
+  const inCart = cartQty > 0;
 
   return (
     <button
+      type="button"
       onClick={() => onAdd(product)}
-      className="relative bg-white rounded-2xl shadow-md hover:shadow-xl active:scale-95 transition-all duration-150 p-5 flex flex-col items-center gap-3 border-2 border-transparent hover:border-blue-700 focus:outline-none focus:border-blue-800 min-h-[160px] w-full group"
+      aria-label={`Add ${product.name}, ${formatCurrency(product.price)}`}
+      className={`group relative flex min-h-[9.5rem] w-full flex-col items-center gap-2 rounded-kiosk border-2 bg-surface p-4 text-center shadow-card transition-transform duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-app ${
+        inCart ? "border-brand" : "border-line"
+      }`}
     >
-      {cartQty > 0 && (
-        <span className="absolute top-2 right-2 bg-blue-800 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow">
+      {inCart && (
+        <span className="absolute right-2 top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-brand px-1.5 text-xs font-bold text-ink-invert shadow-sm">
           {cartQty}
         </span>
       )}
-      <span className="text-5xl leading-none group-hover:scale-110 transition-transform duration-150">{emoji}</span>
-      <div className="text-center">
-        <p className="font-semibold text-gray-800 text-base leading-tight">{product.name}</p>
-        <p className="text-xs text-gray-400 mt-0.5 uppercase tracking-wide">{product.category}</p>
-      </div>
-      <span className="mt-auto bg-gradient-to-r from-blue-800 to-blue-900 text-white font-bold text-base px-4 py-1.5 rounded-full shadow-sm">
+
+      <span aria-hidden className="text-4xl leading-none sm:text-5xl">
+        {emoji}
+      </span>
+
+      <span className="flex flex-col gap-0.5">
+        <span className="text-sm font-bold leading-tight text-ink sm:text-base">
+          {product.name}
+        </span>
+        <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-ink-faint">
+          {product.category}
+        </span>
+      </span>
+
+      <span className="mt-auto rounded-full bg-brand-soft px-3.5 py-1.5 text-sm font-extrabold text-brand-ink">
         {formatCurrency(product.price)}
       </span>
     </button>
