@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useReducer, ReactNode } from "react";
+import React, { createContext, useContext, useEffect, useReducer, useState, ReactNode } from "react";
 import { CartItem, Product } from "@/types";
 
 interface CartState {
@@ -12,7 +12,8 @@ type CartAction =
   | { type: "REMOVE_ITEM"; productId: string }
   | { type: "INCREASE_QTY"; productId: string }
   | { type: "DECREASE_QTY"; productId: string }
-  | { type: "CLEAR_CART" };
+  | { type: "CLEAR_CART" }
+  | { type: "LOAD_CART"; items: CartItem[] };
 
 // True when the cart already holds every unit in stock (no limit if stock is unknown)
 function atStockLimit(product: Product, quantity: number): boolean {
@@ -63,6 +64,8 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     }
     case "CLEAR_CART":
       return { items: [] };
+    case "LOAD_CART":
+      return { items: action.items };
     default:
       return state;
   }
@@ -77,12 +80,37 @@ interface CartContextValue {
   clearCart: () => void;
   totalAmount: number;
   totalItems: number;
+  // False until the saved cart has been restored — don't treat the cart as empty before then
+  hydrated: boolean;
 }
+
+// The cart is kept in sessionStorage so a page reload mid-checkout doesn't lose the order
+const CART_STORAGE_KEY = "kiosk_cart";
 
 const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, { items: [] });
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = window.sessionStorage.getItem(CART_STORAGE_KEY);
+      if (saved) dispatch({ type: "LOAD_CART", items: JSON.parse(saved) });
+    } catch {
+      // Unreadable or unavailable storage — start with an empty cart
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      window.sessionStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.items));
+    } catch {
+      // Storage unavailable — cart stays in memory only
+    }
+  }, [hydrated, state.items]);
 
   const totalAmount = state.items.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
@@ -101,6 +129,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         clearCart: () => dispatch({ type: "CLEAR_CART" }),
         totalAmount,
         totalItems,
+        hydrated,
       }}
     >
       {children}

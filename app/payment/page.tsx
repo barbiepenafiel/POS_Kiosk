@@ -16,7 +16,7 @@ import Toast from "@/components/Toast";
 
 export default function PaymentPage() {
   const router = useRouter();
-  const { items, totalAmount, clearCart } = useCart();
+  const { items, totalAmount, clearCart, hydrated } = useCart();
   const [method, setMethod] = useState<PaymentMethod | null>(null);
   const [processing, setProcessing] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "error" | "success" | "info" } | null>(null);
@@ -30,10 +30,10 @@ export default function PaymentPage() {
   } | null>(null);
 
   useEffect(() => {
-    if (items.length === 0 && !successData) router.replace("/");
-  }, [items.length, successData, router]);
+    if (hydrated && items.length === 0 && !successData) router.replace("/");
+  }, [hydrated, items.length, successData, router]);
 
-  if (items.length === 0 && !successData) return null;
+  if (!hydrated || (items.length === 0 && !successData)) return null;
 
   const handlePayment = async (amountPaid: number, changeAmount: number) => {
     if (processing || !method) return;

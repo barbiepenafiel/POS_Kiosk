@@ -10,13 +10,13 @@ import KioskHeader from "@/components/KioskHeader";
 
 export default function ReviewPage() {
   const router = useRouter();
-  const { items, totalAmount, totalItems } = useCart();
+  const { items, totalAmount, totalItems, hydrated } = useCart();
 
   useEffect(() => {
-    if (items.length === 0) router.replace("/");
-  }, [items.length, router]);
+    if (hydrated && items.length === 0) router.replace("/");
+  }, [hydrated, items.length, router]);
 
-  if (items.length === 0) return null;
+  if (!hydrated || items.length === 0) return null;
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-slate-100 via-blue-50 to-blue-100 overflow-hidden">
